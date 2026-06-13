@@ -28,7 +28,7 @@ export default function Nav() {
     <>
       {/* Mobile top bar */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-green-700 text-white flex items-center justify-between px-4 h-14 shadow-md md:hidden">
-        <span className="font-bold text-lg">🐔 Farm Manager</span>
+        <span className="font-bold text-sm leading-tight">Wandera Retirement Chicken Business</span>
         <button onClick={() => setOpen(!open)} className="p-2">
           {open ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -37,9 +37,12 @@ export default function Nav() {
       {/* Mobile drawer */}
       {open && (
         <div className="fixed inset-0 z-40 bg-black/50 md:hidden" onClick={() => setOpen(false)}>
-          <div className="w-64 h-full bg-white shadow-xl" onClick={e => e.stopPropagation()}>
-            <div className="bg-green-700 text-white px-4 py-4 font-bold text-lg">🐔 Farm Manager</div>
-            <nav className="flex flex-col p-2 gap-1">
+          <div className="w-64 h-full bg-white shadow-xl flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="bg-green-700 text-white px-4 py-4">
+              <p className="font-bold text-base leading-tight">Wandera Retirement</p>
+              <p className="font-bold text-base leading-tight">Chicken Business</p>
+            </div>
+            <nav className="flex flex-col p-2 gap-1 flex-1">
               {links.map(({ href, label, icon: Icon }) => (
                 <Link key={href} href={href}
                   onClick={() => setOpen(false)}
@@ -50,14 +53,21 @@ export default function Nav() {
                 </Link>
               ))}
             </nav>
+            <p className="text-center text-xs text-gray-400 py-3 border-t border-gray-100">
+              Made with love by Emo
+            </p>
           </div>
         </div>
       )}
 
       {/* Desktop sidebar */}
       <aside className="hidden md:flex flex-col w-56 min-h-screen bg-white border-r border-gray-200 fixed top-0 left-0">
-        <div className="bg-green-700 text-white px-4 py-5 font-bold text-lg">🐔 Farm Manager</div>
-        <nav className="flex flex-col p-2 gap-1 mt-2">
+        <div className="bg-green-700 text-white px-4 py-4">
+          <p className="font-bold text-sm leading-snug">Wandera Retirement</p>
+          <p className="font-bold text-sm leading-snug">Chicken Business</p>
+          <p className="text-green-300 text-xs mt-1">Dashboard</p>
+        </div>
+        <nav className="flex flex-col p-2 gap-1 mt-2 flex-1">
           {links.map(({ href, label, icon: Icon }) => (
             <Link key={href} href={href}
               className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors
@@ -67,6 +77,9 @@ export default function Nav() {
             </Link>
           ))}
         </nav>
+        <p className="text-center text-xs text-gray-400 py-3 border-t border-gray-100">
+          Made with love by Emo
+        </p>
       </aside>
     </>
   )
