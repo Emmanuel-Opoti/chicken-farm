@@ -2,13 +2,21 @@
 export const dynamic = 'force-dynamic'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { format } from 'date-fns'
+import { format, differenceInDays } from 'date-fns'
 
-interface Flock { id: string; name: string }
+interface Flock { id: string; name: string; current_count: number; date_received: string; age_at_receipt_weeks: number }
 interface Input { id: string; name: string; category: string; unit: string; price_kes: number }
 interface EggLog { id: string; total_eggs: number; broken_eggs: number }
 interface FeedLog { id: string; input_id: string; quantity_kg: number; cost_kes: number; inputs?: { name: string } | { name: string }[] }
 interface WaterLog { id: string; litres: number }
+
+function getPhaseInfo(flock: Flock) {
+  const daysSince = differenceInDays(new Date(), new Date(flock.date_received))
+  const weeks = (flock.age_at_receipt_weeks || 0) + Math.floor(daysSince / 7)
+  if (weeks <= 8) return { phase: 'Starter', feed: 'Chick Mash', rate: Math.round(10 + (weeks - 1) * 4.3), weeks, color: 'bg-yellow-100 text-yellow-800', border: 'border-yellow-200' }
+  if (weeks <= 18) return { phase: 'Grower', feed: 'Grower Mash', rate: 80, weeks, color: 'bg-blue-100 text-blue-800', border: 'border-blue-200' }
+  return { phase: 'Layer', feed: 'Layer Mash', rate: 115, weeks, color: 'bg-green-100 text-green-800', border: 'border-green-200' }
+}
 
 export default function DailyLog() {
   const [flocks, setFlocks] = useState<Flock[]>([])
@@ -33,11 +41,28 @@ export default function DailyLog() {
   const [editingWater, setEditingWater] = useState<WaterLog | null>(null)
 
   useEffect(() => {
-    supabase.from('flocks').select('id, name').eq('active', true).then(({ data }) => {
+    supabase.from('flocks').select('id, name, current_count, date_received, age_at_receipt_weeks').eq('active', true).then(({ data }) => {
       if (data) { setFlocks(data); if (data.length === 1) setFlockId(data[0].id) }
     })
     supabase.from('inputs').select('*').then(({ data }) => { if (data) setInputs(data) })
   }, [])
+
+  const selectedFlock = flocks.find(f => f.id === flockId) || null
+  const phaseInfo = selectedFlock ? getPhaseInfo(selectedFlock) : null
+
+  // Auto-select recommended feed when flock changes
+  useEffect(() => {
+    if (!phaseInfo) return
+    const match = inputs.find(i => i.category === 'feed' && i.name.toLowerCase().includes(phaseInfo.feed.toLowerCase().split(' ')[0].toLowerCase()))
+    if (match) setFeedInputId(match.id)
+  }, [flockId, inputs])
+
+  // Auto-suggest recommended quantity
+  useEffect(() => {
+    if (!phaseInfo || !selectedFlock) return
+    const recommendedKg = ((phaseInfo.rate * selectedFlock.current_count) / 1000).toFixed(1)
+    setFeedQty(recommendedKg)
+  }, [flockId])
 
   async function loadLogs() {
     if (!flockId || !date) return
@@ -79,7 +104,7 @@ export default function DailyLog() {
       quantity_kg: parseFloat(feedQty), cost_kes: cost,
     })
     setSaving(false)
-    if (!error) { setSaved('Feed saved!'); setFeedQty(''); loadLogs() }
+    if (!error) { setSaved('Feed saved!'); loadLogs() }
   }
 
   async function saveWater(e: React.FormEvent) {
@@ -93,34 +118,27 @@ export default function DailyLog() {
 
   async function deleteEgg(id: string) {
     if (!confirm('Delete this egg record?')) return
-    await supabase.from('egg_logs').delete().eq('id', id)
-    loadLogs()
+    await supabase.from('egg_logs').delete().eq('id', id); loadLogs()
   }
-
   async function deleteFeed(id: string) {
     if (!confirm('Delete this feed record?')) return
-    await supabase.from('feed_logs').delete().eq('id', id)
-    loadLogs()
+    await supabase.from('feed_logs').delete().eq('id', id); loadLogs()
   }
-
   async function deleteWater(id: string) {
     if (!confirm('Delete this water record?')) return
-    await supabase.from('water_logs').delete().eq('id', id)
-    loadLogs()
+    await supabase.from('water_logs').delete().eq('id', id); loadLogs()
   }
 
   async function updateEgg(id: string, total: number, broken: number) {
     await supabase.from('egg_logs').update({ total_eggs: total, broken_eggs: broken }).eq('id', id)
     setEditingEgg(null); loadLogs()
   }
-
   async function updateFeed(id: string, qty: number) {
     const inp = inputs.find(i => i.id === editingFeed?.input_id)
     const cost = inp ? (qty / 50) * inp.price_kes : 0
     await supabase.from('feed_logs').update({ quantity_kg: qty, cost_kes: cost }).eq('id', id)
     setEditingFeed(null); loadLogs()
   }
-
   async function updateWater(id: string, litres: number) {
     await supabase.from('water_logs').update({ litres }).eq('id', id)
     setEditingWater(null); loadLogs()
@@ -154,9 +172,29 @@ export default function DailyLog() {
         </div>
       </div>
 
+      {/* Phase banner */}
+      {phaseInfo && selectedFlock && (
+        <div className={`mb-5 rounded-2xl border p-4 ${phaseInfo.border} ${phaseInfo.color.replace('text-', 'bg-').replace('800', '50').replace('100', '50')}`}>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className={`rounded-full px-3 py-1 text-sm font-bold ${phaseInfo.color}`}>
+              {phaseInfo.phase} Phase — Week {phaseInfo.weeks}
+            </span>
+            <span className="text-sm text-gray-700">
+              <span className="font-medium">Recommended feed:</span> {phaseInfo.feed}
+            </span>
+            <span className="text-sm text-gray-700">
+              <span className="font-medium">Rate:</span> ~{phaseInfo.rate}g/bird/day
+            </span>
+            <span className="text-sm text-gray-700">
+              <span className="font-medium">Expected today:</span> {((phaseInfo.rate * selectedFlock.current_count) / 1000).toFixed(1)} kg for {selectedFlock.current_count} birds
+            </span>
+          </div>
+        </div>
+      )}
+
       <div className="grid md:grid-cols-3 gap-5 mb-8">
         <form onSubmit={saveEggs} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <h2 className="font-bold text-gray-800 mb-4 text-lg">Eggs Collected</h2>
+          <h2 className="font-bold text-gray-800 mb-4 text-lg">🥚 Eggs Collected</h2>
           <div className="mb-3">
             <label className="block text-sm font-medium text-gray-700 mb-1">Total eggs</label>
             <input type="number" min="0" value={eggs} onChange={e => setEggs(e.target.value)}
@@ -180,14 +218,19 @@ export default function DailyLog() {
         </form>
 
         <form onSubmit={saveFeed} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <h2 className="font-bold text-gray-800 mb-4 text-lg">Feed Used</h2>
+          <h2 className="font-bold text-gray-800 mb-4 text-lg">🌾 Feed Used</h2>
+          {phaseInfo && (
+            <p className="text-xs text-gray-500 mb-3 bg-gray-50 rounded-lg px-2 py-1.5">
+              Phase recommends <span className="font-medium">{phaseInfo.feed}</span>
+            </p>
+          )}
           <div className="mb-3">
             <label className="block text-sm font-medium text-gray-700 mb-1">Feed type</label>
             <select value={feedInputId} onChange={e => setFeedInputId(e.target.value)}
               className="w-full border border-gray-300 rounded-xl px-3 py-2 text-base bg-white" required>
               <option value="">Select feed</option>
               {feedInputs.map(f => (
-                <option key={f.id} value={f.id}>{f.name} - KES {f.price_kes}/{f.unit}</option>
+                <option key={f.id} value={f.id}>{f.name} — KES {f.price_kes}/{f.unit}</option>
               ))}
             </select>
           </div>
@@ -196,7 +239,7 @@ export default function DailyLog() {
             <input type="number" min="0" step="0.1" value={feedQty} onChange={e => setFeedQty(e.target.value)}
               placeholder="e.g. 5"
               className="w-full border border-gray-300 rounded-xl px-3 py-2 text-base" required />
-            {feedCost && <p className="text-xs text-gray-500 mt-1">Estimated cost: KES {feedCost}</p>}
+            {feedCost && <p className="text-xs text-gray-500 mt-1">Estimated cost: KES {parseInt(feedCost).toLocaleString()}</p>}
           </div>
           <button disabled={!flockId || saving}
             className="w-full bg-green-600 text-white rounded-xl py-3 font-semibold disabled:opacity-40">
@@ -205,7 +248,17 @@ export default function DailyLog() {
         </form>
 
         <form onSubmit={saveWater} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <h2 className="font-bold text-gray-800 mb-4 text-lg">Water</h2>
+          <h2 className="font-bold text-gray-800 mb-4 text-lg">💧 Water</h2>
+          {phaseInfo && selectedFlock && (
+            <p className="text-xs text-gray-500 mb-3 bg-gray-50 rounded-lg px-2 py-1.5">
+              Recommended: <span className="font-medium">
+                {phaseInfo.weeks <= 2
+                  ? `~${((selectedFlock.current_count / 10)).toFixed(0)} L`
+                  : `~${((selectedFlock.current_count / 10) * 2.5).toFixed(0)}–${((selectedFlock.current_count / 10) * 3).toFixed(0)} L`
+                }
+              </span> for {selectedFlock.current_count} birds
+            </p>
+          )}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">Litres given</label>
             <input type="number" min="0" step="0.5" value={water} onChange={e => setWater(e.target.value)}
@@ -223,7 +276,6 @@ export default function DailyLog() {
         <div>
           <h2 className="font-bold text-gray-800 mb-3">Records for {format(new Date(date), 'd MMM yyyy')}</h2>
           <div className="space-y-3">
-
             {eggLogs.map(r => (
               <div key={r.id} className="bg-white rounded-2xl p-4 shadow-sm border border-yellow-100">
                 {editingEgg?.id === r.id ? (
@@ -232,14 +284,12 @@ export default function DailyLog() {
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <label className="text-xs text-gray-500">Total eggs</label>
-                        <input type="number" min="0" defaultValue={r.total_eggs}
-                          id={`egg-total-${r.id}`}
+                        <input type="number" min="0" defaultValue={r.total_eggs} id={`egg-total-${r.id}`}
                           className="w-full border border-gray-300 rounded-lg px-2 py-1 text-sm mt-0.5" />
                       </div>
                       <div>
                         <label className="text-xs text-gray-500">Broken eggs</label>
-                        <input type="number" min="0" defaultValue={r.broken_eggs}
-                          id={`egg-broken-${r.id}`}
+                        <input type="number" min="0" defaultValue={r.broken_eggs} id={`egg-broken-${r.id}`}
                           className="w-full border border-gray-300 rounded-lg px-2 py-1 text-sm mt-0.5" />
                       </div>
                     </div>
@@ -274,8 +324,7 @@ export default function DailyLog() {
                     <p className="text-sm font-semibold text-gray-700 mb-2">Edit feed record</p>
                     <div>
                       <label className="text-xs text-gray-500">Quantity (kg)</label>
-                      <input type="number" min="0" step="0.1" defaultValue={r.quantity_kg}
-                        id={`feed-qty-${r.id}`}
+                      <input type="number" min="0" step="0.1" defaultValue={r.quantity_kg} id={`feed-qty-${r.id}`}
                         className="w-full border border-gray-300 rounded-lg px-2 py-1 text-sm mt-0.5" />
                     </div>
                     <div className="flex gap-2 mt-2">
@@ -308,8 +357,7 @@ export default function DailyLog() {
                     <p className="text-sm font-semibold text-gray-700 mb-2">Edit water record</p>
                     <div>
                       <label className="text-xs text-gray-500">Litres</label>
-                      <input type="number" min="0" step="0.5" defaultValue={r.litres}
-                        id={`water-litres-${r.id}`}
+                      <input type="number" min="0" step="0.5" defaultValue={r.litres} id={`water-litres-${r.id}`}
                         className="w-full border border-gray-300 rounded-lg px-2 py-1 text-sm mt-0.5" />
                     </div>
                     <div className="flex gap-2 mt-2">
@@ -333,7 +381,6 @@ export default function DailyLog() {
                 )}
               </div>
             ))}
-
           </div>
         </div>
       )}
