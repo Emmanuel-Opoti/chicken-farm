@@ -87,7 +87,7 @@ export default function Dashboard() {
           <div>
             <p className="font-semibold text-amber-800">Prices need review</p>
             <p className="text-sm text-amber-700">Some input prices haven't been updated in over 30 days.
-              <a href="/registry" className="underline ml-1">Update in Registry â†’</a>
+              <a href="/registry" className="underline ml-1">Update in Registry â†'</a>
             </p>
           </div>
         </div>
@@ -98,7 +98,7 @@ export default function Dashboard() {
           <AlertTriangle size={20} className="text-red-500 shrink-0" />
           <p className="text-red-800 font-semibold">
             {stats.pendingVaccinations} vaccination(s) overdue -
-            <a href=”/sop” className=”underline ml-1”>check schedule</a>
+            <a href="/sop" className="underline ml-1">check schedule</a>
           </p>
         </div>
       ) : null}
