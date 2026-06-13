@@ -7,7 +7,7 @@ import { format } from 'date-fns'
 interface Flock { id: string; name: string }
 interface Input { id: string; name: string; category: string; unit: string; price_kes: number }
 interface EggLog { id: string; total_eggs: number; broken_eggs: number }
-interface FeedLog { id: string; input_id: string; quantity_kg: number; cost_kes: number; inputs?: { name: string } }
+interface FeedLog { id: string; input_id: string; quantity_kg: number; cost_kes: number; inputs?: { name: string } | { name: string }[] }
 interface WaterLog { id: string; litres: number }
 
 export default function DailyLog() {
@@ -289,7 +289,7 @@ export default function DailyLog() {
                 ) : (
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-semibold text-gray-900">🌾 {r.inputs?.name || 'Feed'}</p>
+                      <p className="font-semibold text-gray-900">🌾 {(Array.isArray(r.inputs) ? r.inputs[0]?.name : r.inputs?.name) || 'Feed'}</p>
                       <p className="text-xs text-gray-400">{r.quantity_kg} kg · KES {r.cost_kes.toLocaleString()}</p>
                     </div>
                     <div className="flex gap-2">
