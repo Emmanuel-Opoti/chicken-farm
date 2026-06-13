@@ -39,7 +39,7 @@ export default function Clients() {
     <div>
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Clients</h1>
 
-      {msg && <div className="mb-4 bg-green-50 border border-green-200 text-green-800 rounded-xl px-4 py-3">âœ“ {msg}</div>}
+      {msg && <div className="mb-4 bg-green-50 border border-green-200 text-green-800 rounded-xl px-4 py-3">✓ {msg}</div>}
 
       <form onSubmit={save} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-6">
         <h2 className="font-bold text-gray-800 mb-4">Add Client</h2>
@@ -76,7 +76,9 @@ export default function Clients() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-bold text-gray-900">{c.name}</p>
-                <p className="text-sm text-gray-500">{c.phone && `ðŸ“ž ${c.phone}`} {c.location && `Â· ðŸ“ ${c.location}`}</p>
+                <p className="text-sm text-gray-500">
+                  {c.phone && `Tel: ${c.phone}`}{c.phone && c.location ? ' · ' : ''}{c.location && `Location: ${c.location}`}
+                </p>
                 <p className="text-sm text-gray-500">Delivery: KES {c.delivery_cost_kes}</p>
               </div>
               <button onClick={() => toggleActive(c.id, c.active)}
@@ -91,4 +93,3 @@ export default function Clients() {
     </div>
   )
 }
-

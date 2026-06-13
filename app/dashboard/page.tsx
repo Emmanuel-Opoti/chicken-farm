@@ -97,22 +97,22 @@ export default function Dashboard() {
         <div className="mb-5 bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3">
           <AlertTriangle size={20} className="text-red-500 shrink-0" />
           <p className="text-red-800 font-semibold">
-            {stats.pendingVaccinations} vaccination(s) overdue â€”
-            <a href="/sop" className="underline ml-1">check schedule â†’</a>
+            {stats.pendingVaccinations} vaccination(s) overdue -
+            <a href=”/sop” className=”underline ml-1”>check schedule</a>
           </p>
         </div>
       ) : null}
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <StatCard label="Eggs Today" value={stats ? `${stats.todayEggs}` : 'â€”'}
+        <StatCard label="Eggs Today" value={stats ? `${stats.todayEggs}` : '-'}
           sub={stats ? `${stats.todayTrays} trays + ${stats.todayEggs % 12} loose` : undefined}
           icon={Egg} color="bg-yellow-500" />
-        <StatCard label="Feed Cost Today" value={stats ? `KES ${stats.todayFeedCost.toLocaleString()}` : 'â€”'}
+        <StatCard label="Feed Cost Today" value={stats ? `KES ${stats.todayFeedCost.toLocaleString()}` : '-'}
           icon={Wheat} color="bg-green-600" />
-        <StatCard label="Total Birds" value={stats ? `${stats.totalBirds}` : 'â€”'}
+        <StatCard label="Total Birds" value={stats ? `${stats.totalBirds}` : '-'}
           sub={stats ? `${stats.activeFlocks} active flock(s)` : undefined}
           icon={Users} color="bg-blue-500" />
-        <StatCard label="Revenue This Month" value={stats ? `KES ${stats.monthRevenue.toLocaleString()}` : 'â€”'}
+        <StatCard label="Revenue This Month" value={stats ? `KES ${stats.monthRevenue.toLocaleString()}` : '-'}
           icon={TrendingUp} color="bg-purple-600" />
       </div>
 

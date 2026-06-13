@@ -103,7 +103,7 @@ export default function DailyLog() {
       <div className="grid md:grid-cols-3 gap-5">
         {/* Eggs */}
         <form onSubmit={saveEggs} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <h2 className="font-bold text-gray-800 mb-4 text-lg">ðŸ¥š Eggs Collected</h2>
+          <h2 className="font-bold text-gray-800 mb-4 text-lg">Eggs Collected</h2>
           <div className="mb-3">
             <label className="block text-sm font-medium text-gray-700 mb-1">Total eggs</label>
             <input type="number" min="0" value={eggs} onChange={e => setEggs(e.target.value)}
@@ -128,14 +128,14 @@ export default function DailyLog() {
 
         {/* Feed */}
         <form onSubmit={saveFeed} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <h2 className="font-bold text-gray-800 mb-4 text-lg">ðŸŒ¾ Feed Used</h2>
+          <h2 className="font-bold text-gray-800 mb-4 text-lg">Feed Used</h2>
           <div className="mb-3">
             <label className="block text-sm font-medium text-gray-700 mb-1">Feed type</label>
             <select value={feedInputId} onChange={e => setFeedInputId(e.target.value)}
               className="w-full border border-gray-300 rounded-xl px-3 py-2 text-base bg-white" required>
               <option value="">Select feed</option>
               {feedInputs.map(f => (
-                <option key={f.id} value={f.id}>{f.name} â€” KES {f.price_kes}/{f.unit}</option>
+                <option key={f.id} value={f.id}>{f.name} - KES {f.price_kes}/{f.unit}</option>
               ))}
             </select>
           </div>
@@ -154,7 +154,7 @@ export default function DailyLog() {
 
         {/* Water */}
         <form onSubmit={saveWater} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <h2 className="font-bold text-gray-800 mb-4 text-lg">ðŸ’§ Water</h2>
+          <h2 className="font-bold text-gray-800 mb-4 text-lg">Water</h2>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">Litres given</label>
             <input type="number" min="0" step="0.5" value={water} onChange={e => setWater(e.target.value)}
