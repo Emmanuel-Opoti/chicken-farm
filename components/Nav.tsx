@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, ClipboardList, CalendarDays, Users,
-  ShoppingCart, Archive, BarChart2, BookOpen, FileText, Menu, X
+  ShoppingCart, Archive, BarChart2, BookOpen, FileText, HelpCircle, Menu, X
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -17,6 +17,7 @@ const links = [
   { href: '/registry',   label: 'Registry',   icon: Archive },
   { href: '/reports',    label: 'Reports',    icon: FileText },
   { href: '/sop',        label: 'SOP',        icon: BookOpen },
+  { href: '/help',       label: 'Help',       icon: HelpCircle },
 ]
 
 export default function Nav() {
