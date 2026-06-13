@@ -76,6 +76,12 @@ export default function Registry() {
     loadData()
   }
 
+  async function deleteFlock(id: string) {
+    if (!confirm('Permanently delete this flock and all its records? This cannot be undone.')) return
+    await supabase.from('flocks').delete().eq('id', id)
+    loadData()
+  }
+
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Registry</h1>
@@ -143,12 +149,18 @@ export default function Registry() {
                         {f.current_count !== f.initial_count && <span className="text-gray-400"> (started with {f.initial_count})</span>}
                       </p>
                     </div>
-                    {f.active && (
-                      <button onClick={() => deactivateFlock(f.id)}
-                        className="text-xs text-gray-400 border border-gray-200 rounded-lg px-3 py-1">
-                        Deactivate
+                    <div className="flex gap-2">
+                      {f.active && (
+                        <button onClick={() => deactivateFlock(f.id)}
+                          className="text-xs text-gray-400 border border-gray-200 rounded-lg px-3 py-1">
+                          Deactivate
+                        </button>
+                      )}
+                      <button onClick={() => deleteFlock(f.id)}
+                        className="text-xs text-red-400 border border-red-200 rounded-lg px-3 py-1">
+                        Delete
                       </button>
-                    )}
+                    </div>
                   </div>
                 </div>
               )

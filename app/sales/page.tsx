@@ -7,11 +7,13 @@ import { format } from 'date-fns'
 interface Client { id: string; name: string; delivery_cost_kes: number }
 interface Sale {
   id: string; sale_date: string; eggs_sold: number; amount_kes: number
-  paid: boolean; delivery_cost_kes: number; notes: string
+  price_per_egg_kes: number; delivery_cost_kes: number
+  paid: boolean; notes: string
   clients: { name: string } | null
 }
 interface AdhocSale {
-  id: string; sale_date: string; eggs_sold: number; amount_kes: number; notes: string
+  id: string; sale_date: string; eggs_sold: number; amount_kes: number
+  price_per_egg_kes: number; notes: string
 }
 
 export default function Sales() {
@@ -21,6 +23,9 @@ export default function Sales() {
   const [tab, setTab] = useState<'client' | 'adhoc' | 'history'>('client')
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState('')
+
+  const [editingSale, setEditingSale] = useState<Sale | null>(null)
+  const [editingAdhoc, setEditingAdhoc] = useState<AdhocSale | null>(null)
 
   const [clientForm, setClientForm] = useState({
     client_id: '', sale_date: format(new Date(), 'yyyy-MM-dd'),
@@ -88,6 +93,39 @@ export default function Sales() {
   async function markPaid(id: string) {
     await supabase.from('sales').update({ paid: true, payment_date: format(new Date(), 'yyyy-MM-dd') }).eq('id', id)
     load()
+  }
+
+  async function deleteSale(id: string) {
+    if (!confirm('Delete this sale record?')) return
+    await supabase.from('sales').delete().eq('id', id)
+    load()
+  }
+
+  async function deleteAdhoc(id: string) {
+    if (!confirm('Delete this ad-hoc sale?')) return
+    await supabase.from('adhoc_sales').delete().eq('id', id)
+    load()
+  }
+
+  async function updateSale(s: Sale, eggs: number, price: number, delivery: number, notes: string) {
+    await supabase.from('sales').update({
+      eggs_sold: eggs,
+      price_per_egg_kes: price,
+      delivery_cost_kes: delivery,
+      amount_kes: eggs * price + delivery,
+      notes,
+    }).eq('id', s.id)
+    setEditingSale(null); load()
+  }
+
+  async function updateAdhoc(a: AdhocSale, eggs: number, price: number, notes: string) {
+    await supabase.from('adhoc_sales').update({
+      eggs_sold: eggs,
+      price_per_egg_kes: price,
+      amount_kes: eggs * price,
+      notes,
+    }).eq('id', a.id)
+    setEditingAdhoc(null); load()
   }
 
   return (
@@ -190,36 +228,137 @@ export default function Sales() {
           <h2 className="font-bold text-gray-800">Client Sales</h2>
           {sales.map(s => (
             <div key={s.id} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-semibold text-gray-900">{s.clients?.name || 'Walk-in'}</p>
-                  <p className="text-sm text-gray-500">{format(new Date(s.sale_date), 'd MMM yyyy')} · {s.eggs_sold} eggs ({Math.floor(s.eggs_sold/12)} trays)</p>
+              {editingSale?.id === s.id ? (
+                <EditSaleForm sale={s} onSave={(eggs, price, delivery, notes) => updateSale(s, eggs, price, delivery, notes)} onCancel={() => setEditingSale(null)} />
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold text-gray-900">{s.clients?.name || 'Walk-in'}</p>
+                    <p className="text-sm text-gray-500">{format(new Date(s.sale_date), 'd MMM yyyy')} · {s.eggs_sold} eggs ({Math.floor(s.eggs_sold/12)} trays)</p>
+                    {s.notes && <p className="text-xs text-gray-400">{s.notes}</p>}
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-gray-900">KES {s.amount_kes.toLocaleString()}</p>
+                    <div className="flex gap-2 mt-1 justify-end">
+                      {!s.paid && <button onClick={() => markPaid(s.id)} className="text-xs text-red-500 underline">Mark paid</button>}
+                      {s.paid && <span className="text-xs text-green-600">Paid</span>}
+                      <button onClick={() => setEditingSale(s)} className="text-xs border border-gray-200 rounded-lg px-2 py-0.5 text-gray-600">Edit</button>
+                      <button onClick={() => deleteSale(s.id)} className="text-xs border border-red-200 rounded-lg px-2 py-0.5 text-red-500">Delete</button>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-bold text-gray-900">KES {s.amount_kes.toLocaleString()}</p>
-                  {s.paid
-                    ? <span className="text-xs text-green-600">Paid</span>
-                    : <button onClick={() => markPaid(s.id)} className="text-xs text-red-500 underline">Mark paid</button>
-                  }
-                </div>
-              </div>
+              )}
             </div>
           ))}
 
           <h2 className="font-bold text-gray-800 pt-4">Ad-hoc Sales</h2>
           {adhoc.map(s => (
             <div key={s.id} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500">{format(new Date(s.sale_date), 'd MMM yyyy')} · {s.eggs_sold} eggs</p>
-                  {s.notes && <p className="text-xs text-gray-400">{s.notes}</p>}
+              {editingAdhoc?.id === s.id ? (
+                <EditAdhocForm sale={s} onSave={(eggs, price, notes) => updateAdhoc(s, eggs, price, notes)} onCancel={() => setEditingAdhoc(null)} />
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500">{format(new Date(s.sale_date), 'd MMM yyyy')} · {s.eggs_sold} eggs</p>
+                    {s.notes && <p className="text-xs text-gray-400">{s.notes}</p>}
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-gray-900">KES {s.amount_kes.toLocaleString()}</p>
+                    <div className="flex gap-2 mt-1 justify-end">
+                      <button onClick={() => setEditingAdhoc(s)} className="text-xs border border-gray-200 rounded-lg px-2 py-0.5 text-gray-600">Edit</button>
+                      <button onClick={() => deleteAdhoc(s.id)} className="text-xs border border-red-200 rounded-lg px-2 py-0.5 text-red-500">Delete</button>
+                    </div>
+                  </div>
                 </div>
-                <p className="font-bold text-gray-900">KES {s.amount_kes.toLocaleString()}</p>
-              </div>
+              )}
             </div>
           ))}
         </div>
       )}
+    </div>
+  )
+}
+
+function EditSaleForm({ sale, onSave, onCancel }: {
+  sale: Sale
+  onSave: (eggs: number, price: number, delivery: number, notes: string) => void
+  onCancel: () => void
+}) {
+  const [eggs, setEggs] = useState(String(sale.eggs_sold))
+  const [price, setPrice] = useState(String(sale.price_per_egg_kes))
+  const [delivery, setDelivery] = useState(String(sale.delivery_cost_kes))
+  const [notes, setNotes] = useState(sale.notes || '')
+  const total = eggs && price ? (parseInt(eggs) * parseFloat(price) + parseFloat(delivery || '0')).toFixed(0) : null
+  return (
+    <div className="space-y-2">
+      <p className="text-sm font-semibold text-gray-700 mb-2">Edit sale</p>
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <label className="text-xs text-gray-500">Eggs sold</label>
+          <input type="number" min="1" value={eggs} onChange={e => setEggs(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-2 py-1 text-sm mt-0.5" />
+        </div>
+        <div>
+          <label className="text-xs text-gray-500">Price/egg (KES)</label>
+          <input type="number" min="0" step="0.5" value={price} onChange={e => setPrice(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-2 py-1 text-sm mt-0.5" />
+        </div>
+        <div>
+          <label className="text-xs text-gray-500">Delivery (KES)</label>
+          <input type="number" min="0" value={delivery} onChange={e => setDelivery(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-2 py-1 text-sm mt-0.5" />
+        </div>
+        <div>
+          <label className="text-xs text-gray-500">Notes</label>
+          <input value={notes} onChange={e => setNotes(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-2 py-1 text-sm mt-0.5" />
+        </div>
+      </div>
+      {total && <p className="text-xs text-green-700 font-semibold">Total: KES {parseInt(total).toLocaleString()}</p>}
+      <div className="flex gap-2">
+        <button onClick={() => onSave(parseInt(eggs), parseFloat(price), parseFloat(delivery || '0'), notes)}
+          className="bg-green-600 text-white rounded-lg px-4 py-1.5 text-sm font-medium">Save</button>
+        <button onClick={onCancel} className="border border-gray-300 rounded-lg px-4 py-1.5 text-sm text-gray-600">Cancel</button>
+      </div>
+    </div>
+  )
+}
+
+function EditAdhocForm({ sale, onSave, onCancel }: {
+  sale: AdhocSale
+  onSave: (eggs: number, price: number, notes: string) => void
+  onCancel: () => void
+}) {
+  const [eggs, setEggs] = useState(String(sale.eggs_sold))
+  const [price, setPrice] = useState(String(sale.price_per_egg_kes))
+  const [notes, setNotes] = useState(sale.notes || '')
+  const total = eggs && price ? (parseInt(eggs) * parseFloat(price)).toFixed(0) : null
+  return (
+    <div className="space-y-2">
+      <p className="text-sm font-semibold text-gray-700 mb-2">Edit ad-hoc sale</p>
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <label className="text-xs text-gray-500">Eggs sold</label>
+          <input type="number" min="1" value={eggs} onChange={e => setEggs(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-2 py-1 text-sm mt-0.5" />
+        </div>
+        <div>
+          <label className="text-xs text-gray-500">Price/egg (KES)</label>
+          <input type="number" min="0" step="0.5" value={price} onChange={e => setPrice(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-2 py-1 text-sm mt-0.5" />
+        </div>
+        <div className="col-span-2">
+          <label className="text-xs text-gray-500">Notes</label>
+          <input value={notes} onChange={e => setNotes(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-2 py-1 text-sm mt-0.5" />
+        </div>
+      </div>
+      {total && <p className="text-xs text-green-700 font-semibold">Total: KES {parseInt(total).toLocaleString()}</p>}
+      <div className="flex gap-2">
+        <button onClick={() => onSave(parseInt(eggs), parseFloat(price), notes)}
+          className="bg-green-600 text-white rounded-lg px-4 py-1.5 text-sm font-medium">Save</button>
+        <button onClick={onCancel} className="border border-gray-300 rounded-lg px-4 py-1.5 text-sm text-gray-600">Cancel</button>
+      </div>
     </div>
   )
 }

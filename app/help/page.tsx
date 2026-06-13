@@ -9,6 +9,7 @@ const FAQ: Record<string, { q: string; a: string }[]> = {
     { q: 'How do I log feed?', a: 'Tap "Feed Used", select the feed type from the dropdown (Chick Mash, Grower Mash, or Layer Mash), then enter the quantity in kg. The app shows you the estimated cost based on the current price.' },
     { q: 'How do I log water?', a: 'Tap the "Water" section and enter the number of litres given to the flock for that day.' },
     { q: 'Can I log data for a past date?', a: 'Yes. Change the Date field at the top to any past date before saving.' },
+    { q: 'How do I correct a wrong daily entry?', a: 'Select the flock and the date of the wrong entry. Your saved records for that day will appear below the forms. Tap "Edit" next to the record to change the values, or "Delete" to remove it entirely.' },
   ],
   'Dashboard': [
     { q: 'What are the cards on the dashboard?', a: 'The four cards show: Eggs collected today, Feed cost today (in KES), Total number of birds across all active flocks, and Total revenue earned this month.' },
@@ -20,12 +21,14 @@ const FAQ: Record<string, { q: string; a: string }[]> = {
     { q: 'How do I add a feed or vaccine to the registry?', a: 'Go to Registry, tap "Inputs & Prices", fill in the name, category (feed/vaccine/medicine), unit, and price, then tap "Add Input".' },
     { q: 'How do I update a price?', a: 'Go to Registry, tap "Inputs & Prices". Find the item and tap "Update price". A box will appear asking for the new price. Enter it and tap OK.' },
     { q: 'What does the amber warning on an input mean?', a: 'It means the price for that item has not been reviewed in over 30 days. Tap "Update price" to confirm or change the current price.' },
+    { q: 'How do I delete a flock entered by mistake?', a: 'Go to Registry, tap "Flocks". Find the flock and tap "Delete". You will be asked to confirm before it is permanently removed. To simply retire a flock that has finished laying, use "Deactivate" instead — this keeps its history.' },
   ],
   'Sales': [
     { q: 'How do I record a sale to a client?', a: 'Go to Sales, tap "Client Sale". Select the client from the dropdown, enter the date, number of eggs sold, price per egg, and delivery cost. The total will be shown before you save.' },
     { q: 'How do I record a small sale (less than a tray)?', a: 'Go to Sales, tap "Ad-hoc Sale". Enter the date, number of eggs (1 to 11), and price per egg. This does not need a client name.' },
     { q: 'How do I mark a client as paid?', a: 'Go to Sales, tap "History", find the sale under "Client Sales" and tap "Mark paid".' },
     { q: 'What if a client is not in the dropdown?', a: 'You need to add them first. Go to Clients, fill in their details and tap "Add Client". They will then appear in the Sales dropdown.' },
+    { q: 'How do I edit or delete a wrong sale?', a: 'Go to Sales, tap "History". Find the sale and tap "Edit" to correct the eggs, price, or delivery cost, or tap "Delete" to remove it. Both client sales and ad-hoc sales can be edited or deleted.' },
   ],
   'Clients': [
     { q: 'How do I add a client?', a: 'Go to Clients, fill in the name, phone number, location, and their standard delivery cost. Tap "Add Client".' },
