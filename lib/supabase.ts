@@ -1,6 +1,20 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+let _client: SupabaseClient | null = null
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export function getSupabase() {
+  if (!_client) {
+    _client = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+  }
+  return _client
+}
+
+// Proxy so existing code using `supabase.from(...)` keeps working
+export const supabase = new Proxy({} as SupabaseClient, {
+  get(_target, prop) {
+    return (getSupabase() as unknown as Record<string, unknown>)[prop as string]
+  },
+})
