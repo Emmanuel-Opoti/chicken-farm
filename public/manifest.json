@@ -1,0 +1,41 @@
+{
+  "name": "Wandera Chicken Business",
+  "short_name": "Wandera Farm",
+  "description": "Chicken farm daily tracker, sales, analytics and reports",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#15803d",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Daily Log",
+      "short_name": "Log",
+      "description": "Record today's eggs, feed and water",
+      "url": "/daily",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Record Sale",
+      "short_name": "Sales",
+      "description": "Record a client or ad-hoc sale",
+      "url": "/sales",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
