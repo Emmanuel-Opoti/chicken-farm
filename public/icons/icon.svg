@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#15803d"/>
+
+  <!-- Chicken scaled 10% smaller, shifted up to leave room for text -->
+  <g transform="translate(256,228) scale(0.9) translate(-260,-285)">
+    <ellipse cx="260" cy="285" rx="110" ry="88" fill="none" stroke="white" stroke-width="16"/>
+    <circle cx="338" cy="172" r="50" fill="none" stroke="white" stroke-width="16"/>
+    <line x1="312" y1="218" x2="294" y2="244" stroke="white" stroke-width="16" stroke-linecap="round"/>
+    <polygon points="384,165 418,178 384,191" fill="white"/>
+    <path d="M316,126 Q326,96 336,116 Q346,86 356,106 Q366,78 376,100 L380,124" fill="none" stroke="white" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="356" cy="168" r="8" fill="white"/>
+    <ellipse cx="384" cy="200" rx="10" ry="15" fill="white"/>
+    <path d="M152,242 Q100,196 88,156" fill="none" stroke="white" stroke-width="13" stroke-linecap="round"/>
+    <path d="M152,265 Q86,246 70,206" fill="none" stroke="white" stroke-width="13" stroke-linecap="round"/>
+    <path d="M152,290 Q94,292 78,272" fill="none" stroke="white" stroke-width="13" stroke-linecap="round"/>
+    <line x1="228" y1="370" x2="212" y2="418" stroke="white" stroke-width="13" stroke-linecap="round"/>
+    <line x1="212" y1="418" x2="186" y2="438" stroke="white" stroke-width="10" stroke-linecap="round"/>
+    <line x1="212" y1="418" x2="212" y2="446" stroke="white" stroke-width="10" stroke-linecap="round"/>
+    <line x1="212" y1="418" x2="236" y2="440" stroke="white" stroke-width="10" stroke-linecap="round"/>
+    <line x1="292" y1="370" x2="308" y2="418" stroke="white" stroke-width="13" stroke-linecap="round"/>
+    <line x1="308" y1="418" x2="282" y2="440" stroke="white" stroke-width="10" stroke-linecap="round"/>
+    <line x1="308" y1="418" x2="308" y2="446" stroke="white" stroke-width="10" stroke-linecap="round"/>
+    <line x1="308" y1="418" x2="332" y2="440" stroke="white" stroke-width="10" stroke-linecap="round"/>
+  </g>
+
+  <!-- WANDERA below the chicken -->
+  <text x="256" y="460"
+    font-family="'Times New Roman', Times, serif"
+    font-weight="700"
+    font-size="52"
+    fill="white"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    letter-spacing="3">WANDERA</text>
+</svg>
