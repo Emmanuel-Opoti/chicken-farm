@@ -1,3 +1,4 @@
+﻿export const dynamic = 'force-dynamic'
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
@@ -93,10 +94,10 @@ export default function Sales() {
     <div>
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Sales</h1>
 
-      {msg && <div className="mb-4 bg-green-50 border border-green-200 text-green-800 rounded-xl px-4 py-3">✓ {msg}</div>}
+      {msg && <div className="mb-4 bg-green-50 border border-green-200 text-green-800 rounded-xl px-4 py-3">âœ“ {msg}</div>}
 
       <div className="flex gap-2 mb-6 flex-wrap">
-        {([['client', '👤 Client Sale'], ['adhoc', '🛍 Ad-hoc Sale'], ['history', '📋 History']] as const).map(([t, label]) => (
+        {([['client', 'ðŸ‘¤ Client Sale'], ['adhoc', 'ðŸ› Ad-hoc Sale'], ['history', 'ðŸ“‹ History']] as const).map(([t, label]) => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-4 py-2 rounded-xl font-medium ${tab === t ? 'bg-green-700 text-white' : 'bg-white border text-gray-600'}`}>
             {label}
@@ -192,12 +193,12 @@ export default function Sales() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-semibold text-gray-900">{s.clients?.name || 'Walk-in'}</p>
-                  <p className="text-sm text-gray-500">{format(new Date(s.sale_date), 'd MMM yyyy')} · {s.eggs_sold} eggs ({Math.floor(s.eggs_sold/12)} trays)</p>
+                  <p className="text-sm text-gray-500">{format(new Date(s.sale_date), 'd MMM yyyy')} Â· {s.eggs_sold} eggs ({Math.floor(s.eggs_sold/12)} trays)</p>
                 </div>
                 <div className="text-right">
                   <p className="font-bold text-gray-900">KES {s.amount_kes.toLocaleString()}</p>
                   {s.paid
-                    ? <span className="text-xs text-green-600">✓ Paid</span>
+                    ? <span className="text-xs text-green-600">âœ“ Paid</span>
                     : <button onClick={() => markPaid(s.id)} className="text-xs text-red-500 underline">Mark paid</button>
                   }
                 </div>
@@ -210,7 +211,7 @@ export default function Sales() {
             <div key={s.id} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500">{format(new Date(s.sale_date), 'd MMM yyyy')} · {s.eggs_sold} eggs</p>
+                  <p className="text-sm text-gray-500">{format(new Date(s.sale_date), 'd MMM yyyy')} Â· {s.eggs_sold} eggs</p>
                   {s.notes && <p className="text-xs text-gray-400">{s.notes}</p>}
                 </div>
                 <p className="font-bold text-gray-900">KES {s.amount_kes.toLocaleString()}</p>
@@ -222,3 +223,4 @@ export default function Sales() {
     </div>
   )
 }
+

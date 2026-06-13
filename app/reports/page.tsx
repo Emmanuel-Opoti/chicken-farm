@@ -1,3 +1,4 @@
+﻿export const dynamic = 'force-dynamic'
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
@@ -39,7 +40,7 @@ function ReportCard({ label, data, start, end }: { label: string; data: ReportDa
   return (
     <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
       <h2 className="font-bold text-gray-800 text-lg mb-1">{label}</h2>
-      <p className="text-xs text-gray-400 mb-4">{format(new Date(start), 'd MMM')} – {format(new Date(end), 'd MMM yyyy')}</p>
+      <p className="text-xs text-gray-400 mb-4">{format(new Date(start), 'd MMM')} â€“ {format(new Date(end), 'd MMM yyyy')}</p>
       <div className="grid grid-cols-2 gap-y-3 text-sm">
         <span className="text-gray-500">Total eggs</span>
         <span className="font-semibold">{data.totalEggs.toLocaleString()} ({data.totalTrays} trays)</span>
@@ -85,10 +86,11 @@ export default function Reports() {
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Reports</h1>
       <div className="grid md:grid-cols-2 gap-5">
         {reports.length === 0
-          ? <p className="text-gray-400 col-span-2 py-10 text-center">Loading reports…</p>
+          ? <p className="text-gray-400 col-span-2 py-10 text-center">Loading reportsâ€¦</p>
           : reports.map(r => <ReportCard key={r.label} {...r} />)
         }
       </div>
     </div>
   )
 }
+

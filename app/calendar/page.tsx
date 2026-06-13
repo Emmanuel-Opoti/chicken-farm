@@ -1,3 +1,4 @@
+﻿export const dynamic = 'force-dynamic'
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
@@ -44,11 +45,11 @@ export default function CalendarPage() {
         <h1 className="text-2xl font-bold text-gray-900">{format(current, 'MMMM yyyy')}</h1>
         <div className="flex gap-2">
           <button onClick={() => setCurrent(subMonths(current, 1))}
-            className="bg-white border rounded-xl px-4 py-2 text-gray-600">‹</button>
+            className="bg-white border rounded-xl px-4 py-2 text-gray-600">â€¹</button>
           <button onClick={() => setCurrent(new Date())}
             className="bg-white border rounded-xl px-4 py-2 text-gray-600 text-sm">Today</button>
           <button onClick={() => setCurrent(addMonths(current, 1))}
-            className="bg-white border rounded-xl px-4 py-2 text-gray-600">›</button>
+            className="bg-white border rounded-xl px-4 py-2 text-gray-600">â€º</button>
         </div>
       </div>
 
@@ -93,10 +94,10 @@ export default function CalendarPage() {
                   {format(day, 'd')}
                 </p>
                 {d?.eggs ? (
-                  <p className="text-[10px] text-yellow-600 font-medium mt-0.5">🥚 {d.eggs}</p>
+                  <p className="text-[10px] text-yellow-600 font-medium mt-0.5">ðŸ¥š {d.eggs}</p>
                 ) : null}
                 {d?.feedCost ? (
-                  <p className="text-[10px] text-green-700 font-medium">🌾 {d.feedCost}</p>
+                  <p className="text-[10px] text-green-700 font-medium">ðŸŒ¾ {d.feedCost}</p>
                 ) : null}
               </button>
             )
@@ -106,3 +107,4 @@ export default function CalendarPage() {
     </div>
   )
 }
+

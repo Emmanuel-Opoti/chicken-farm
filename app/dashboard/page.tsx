@@ -1,3 +1,4 @@
+﻿export const dynamic = 'force-dynamic'
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
@@ -86,7 +87,7 @@ export default function Dashboard() {
           <div>
             <p className="font-semibold text-amber-800">Prices need review</p>
             <p className="text-sm text-amber-700">Some input prices haven't been updated in over 30 days.
-              <a href="/registry" className="underline ml-1">Update in Registry →</a>
+              <a href="/registry" className="underline ml-1">Update in Registry â†’</a>
             </p>
           </div>
         </div>
@@ -96,22 +97,22 @@ export default function Dashboard() {
         <div className="mb-5 bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3">
           <AlertTriangle size={20} className="text-red-500 shrink-0" />
           <p className="text-red-800 font-semibold">
-            {stats.pendingVaccinations} vaccination(s) overdue —
-            <a href="/sop" className="underline ml-1">check schedule →</a>
+            {stats.pendingVaccinations} vaccination(s) overdue â€”
+            <a href="/sop" className="underline ml-1">check schedule â†’</a>
           </p>
         </div>
       ) : null}
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <StatCard label="Eggs Today" value={stats ? `${stats.todayEggs}` : '—'}
+        <StatCard label="Eggs Today" value={stats ? `${stats.todayEggs}` : 'â€”'}
           sub={stats ? `${stats.todayTrays} trays + ${stats.todayEggs % 12} loose` : undefined}
           icon={Egg} color="bg-yellow-500" />
-        <StatCard label="Feed Cost Today" value={stats ? `KES ${stats.todayFeedCost.toLocaleString()}` : '—'}
+        <StatCard label="Feed Cost Today" value={stats ? `KES ${stats.todayFeedCost.toLocaleString()}` : 'â€”'}
           icon={Wheat} color="bg-green-600" />
-        <StatCard label="Total Birds" value={stats ? `${stats.totalBirds}` : '—'}
+        <StatCard label="Total Birds" value={stats ? `${stats.totalBirds}` : 'â€”'}
           sub={stats ? `${stats.activeFlocks} active flock(s)` : undefined}
           icon={Users} color="bg-blue-500" />
-        <StatCard label="Revenue This Month" value={stats ? `KES ${stats.monthRevenue.toLocaleString()}` : '—'}
+        <StatCard label="Revenue This Month" value={stats ? `KES ${stats.monthRevenue.toLocaleString()}` : 'â€”'}
           icon={TrendingUp} color="bg-purple-600" />
       </div>
 
@@ -128,3 +129,4 @@ export default function Dashboard() {
     </div>
   )
 }
+

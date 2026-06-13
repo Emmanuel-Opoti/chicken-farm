@@ -1,24 +1,25 @@
+export const dynamic = 'force-dynamic'
 'use client'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { format, addDays } from 'date-fns'
 
 const VACCINATION_SCHEDULE = [
-  { day: 1,   name: "Marek's Disease",     method: "Injection (done at hatchery)", note: "Given before chicks leave hatchery" },
-  { day: 7,   name: "Newcastle + IB (ND+IB)", method: "Eye drop", note: "Hold chick, one drop per eye" },
-  { day: 14,  name: "Gumboro (IBD)",        method: "Drinking water", note: "Withhold water 2hrs before, vaccinate in morning" },
-  { day: 21,  name: "Newcastle (ND)",        method: "Drinking water", note: "Clean drinkers thoroughly first" },
-  { day: 28,  name: "Gumboro booster (IBD)", method: "Drinking water", note: "Withhold water 2hrs before" },
-  { day: 42,  name: "Fowl Typhoid",          method: "Injection (wing web)", note: "Use sterile needle per bird" },
-  { day: 56,  name: "Newcastle booster",     method: "Drinking water", note: "" },
-  { day: 84,  name: "Fowl Typhoid booster",  method: "Injection (wing web)", note: "" },
-  { day: 112, name: "Newcastle (pre-lay)",   method: "Drinking water", note: "Must be done before point of lay" },
+  { day: 1,   name: "Marek's Disease",        method: "Injection (done at hatchery)", note: "Given before chicks leave hatchery" },
+  { day: 7,   name: "Newcastle + IB (ND+IB)", method: "Eye drop",                     note: "Hold chick, one drop per eye" },
+  { day: 14,  name: "Gumboro (IBD)",           method: "Drinking water",               note: "Withhold water 2hrs before, vaccinate in morning" },
+  { day: 21,  name: "Newcastle (ND)",          method: "Drinking water",               note: "Clean drinkers thoroughly first" },
+  { day: 28,  name: "Gumboro booster (IBD)",   method: "Drinking water",               note: "Withhold water 2hrs before" },
+  { day: 42,  name: "Fowl Typhoid",            method: "Injection (wing web)",         note: "Use sterile needle per bird" },
+  { day: 56,  name: "Newcastle booster",       method: "Drinking water",               note: "" },
+  { day: 84,  name: "Fowl Typhoid booster",    method: "Injection (wing web)",         note: "" },
+  { day: 112, name: "Newcastle (pre-lay)",     method: "Drinking water",               note: "Must be done before point of lay" },
 ]
 
 const FEEDING_SCHEDULE = [
-  { phase: "Starter", weeks: "1–8", feed: "Chick Mash", rate: "~8–10g/bird/day → 40g/bird/day by end", tips: "Keep feeders and drinkers close to heat source. Ad-lib feeding. Check for pasty butt daily." },
-  { phase: "Grower", weeks: "9–18", feed: "Grower Mash", rate: "~70–90g/bird/day", tips: "Reduce heat gradually. Ensure adequate space. Deworm at week 10 and 16." },
-  { phase: "Layer", weeks: "19+", feed: "Layer Mash", rate: "~110–120g/bird/day", tips: "Switch to layer mash at first signs of lay (red comb, squatting). Provide oyster shell supplement for strong shells." },
+  { phase: "Starter", weeks: "1-8",  feed: "Chick Mash",  rate: "~8-10g/bird/day up to 40g/bird/day by end",   tips: "Keep feeders and drinkers close to heat source. Ad-lib feeding. Check for pasty butt daily." },
+  { phase: "Grower",  weeks: "9-18", feed: "Grower Mash", rate: "~70-90g/bird/day",                             tips: "Reduce heat gradually. Ensure adequate space. Deworm at week 10 and 16." },
+  { phase: "Layer",   weeks: "19+",  feed: "Layer Mash",  rate: "~110-120g/bird/day",                           tips: "Switch to layer mash at first signs of lay (red comb, squatting). Provide oyster shell supplement for strong shells." },
 ]
 
 interface Flock { id: string; name: string; date_received: string }
@@ -57,17 +58,16 @@ export default function SOP() {
       <p className="text-gray-500 text-sm mb-6">Kenchic Layer Program</p>
 
       <div className="flex gap-2 mb-6">
-        {([['vaccination', '💉 Vaccination'], ['feeding', '🌾 Feeding']] as const).map(([t, label]) => (
+        {([['vaccination', 'Vaccination'], ['feeding', 'Feeding']] as const).map(([t, label]) => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-4 py-2 rounded-xl font-medium ${tab === t ? 'bg-green-700 text-white' : 'bg-white border text-gray-600'}`}>
-            {label}
+            {t === 'vaccination' ? '💉 ' : '🌾 '}{label}
           </button>
         ))}
       </div>
 
       {tab === 'vaccination' && (
         <div className="space-y-5">
-          {/* Generate schedule for a flock */}
           <div className="bg-green-50 border border-green-200 rounded-2xl p-4">
             {msg && <p className="text-green-800 font-semibold mb-3">✓ {msg}</p>}
             <p className="text-sm font-medium text-green-900 mb-2">Generate vaccination schedule for a flock</p>
@@ -134,8 +134,8 @@ export default function SOP() {
             <p className="font-semibold text-amber-900 mb-2">💧 Water Schedule</p>
             <ul className="text-sm text-amber-800 space-y-1">
               <li>• Provide clean, fresh water at all times (ad-lib)</li>
-              <li>• Chicks: 1 litre per 10 birds per day (week 1–2)</li>
-              <li>• Growers/Layers: 2–3 litres per 10 birds per day</li>
+              <li>• Chicks: 1 litre per 10 birds per day (week 1-2)</li>
+              <li>• Growers/Layers: 2-3 litres per 10 birds per day</li>
               <li>• Add electrolytes during stress or after vaccination</li>
               <li>• Clean and disinfect drinkers daily</li>
             </ul>

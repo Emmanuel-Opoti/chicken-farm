@@ -1,3 +1,4 @@
+﻿export const dynamic = 'force-dynamic'
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
@@ -81,13 +82,13 @@ export default function Registry() {
     <div>
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Registry</h1>
 
-      {msg && <div className="mb-4 bg-green-50 border border-green-200 text-green-800 rounded-xl px-4 py-3">✓ {msg}</div>}
+      {msg && <div className="mb-4 bg-green-50 border border-green-200 text-green-800 rounded-xl px-4 py-3">âœ“ {msg}</div>}
 
       <div className="flex gap-2 mb-6">
         {(['flocks', 'inputs'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-5 py-2 rounded-xl font-medium capitalize ${tab === t ? 'bg-green-700 text-white' : 'bg-white border text-gray-600'}`}>
-            {t === 'flocks' ? '🐔 Flocks' : '📦 Inputs & Prices'}
+            {t === 'flocks' ? 'ðŸ” Flocks' : 'ðŸ“¦ Inputs & Prices'}
           </button>
         ))}
       </div>
@@ -138,7 +139,7 @@ export default function Registry() {
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="font-bold text-gray-900">{f.name}</p>
-                      <p className="text-sm text-gray-500">{f.breed} · Received {format(new Date(f.date_received), 'd MMM yyyy')} · Age: {weeks} weeks</p>
+                      <p className="text-sm text-gray-500">{f.breed} Â· Received {format(new Date(f.date_received), 'd MMM yyyy')} Â· Age: {weeks} weeks</p>
                       <p className="text-sm text-gray-600 mt-1">
                         <span className="font-medium">{f.current_count}</span> birds
                         {f.current_count !== f.initial_count && <span className="text-gray-400"> (started with {f.initial_count})</span>}
@@ -203,8 +204,8 @@ export default function Registry() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-semibold text-gray-900">{i.name}</p>
-                      <p className="text-sm text-gray-500 capitalize">{i.category} · per {i.unit}</p>
-                      {stale && <p className="text-xs text-amber-600 mt-0.5">⚠ Price last updated {daysSince} days ago</p>}
+                      <p className="text-sm text-gray-500 capitalize">{i.category} Â· per {i.unit}</p>
+                      {stale && <p className="text-xs text-amber-600 mt-0.5">âš  Price last updated {daysSince} days ago</p>}
                     </div>
                     <div className="text-right">
                       <p className="font-bold text-gray-900">KES {i.price_kes.toLocaleString()}</p>
@@ -221,3 +222,4 @@ export default function Registry() {
     </div>
   )
 }
+
