@@ -3,11 +3,12 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, ClipboardList, CalendarDays, Users,
-  ShoppingCart, Archive, BarChart2, BookOpen, FileText, HelpCircle, Menu, X
+  ShoppingCart, Archive, BarChart2, BookOpen, FileText, HelpCircle, Menu, X, Home
 } from 'lucide-react'
 import { useState } from 'react'
 
 const links = [
+  { href: '/welcome',    label: 'Welcome',    icon: Home },
   { href: '/dashboard',  label: 'Dashboard',  icon: LayoutDashboard },
   { href: '/daily',      label: 'Daily Log',  icon: ClipboardList },
   { href: '/calendar',   label: 'Calendar',   icon: CalendarDays },
