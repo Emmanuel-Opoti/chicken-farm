@@ -32,7 +32,9 @@ const modules = [
       'Log water given in litres',
       'Phase banner shows current Starter / Grower / Layer phase for the selected flock',
       'Recommended feed type and quantity pre-filled based on flock age and bird count',
-      'Edit or delete any record if a mistake was made',
+      'Log mortality — select flock, choose type (Sickness / Culling / Slaughter / Natural/Age), enter count; flock total updates automatically',
+      'Mortality History tab: view all deaths per flock with a per-type summary, edit or delete any record (flock count adjusts accordingly)',
+      'Edit or delete any egg, feed, or water record if a mistake was made',
     ],
   },
   {
@@ -111,8 +113,10 @@ const modules = [
     summary: 'Automatic summaries, no setup needed.',
     points: [
       'Six auto-generated reports: This Week, Last Week, This Month, Last Month, This Year, Last Year',
-      'Each report shows: total eggs, feed cost, vaccine cost, client sales, ad-hoc sales, total revenue',
+      'Each report shows: live bird count, total eggs, feed cost, vaccine cost, client sales, ad-hoc sales, total revenue',
       'Net profit calculated automatically (revenue minus all costs)',
+      'Mortality breakdown per period: total birds lost, split by Sickness / Culling / Slaughter / Natural Age',
+      'Export any report to a branded PDF — includes all metrics and the mortality summary',
       'Reports update in real time as you add new records',
     ],
   },
@@ -125,9 +129,12 @@ const modules = [
     points: [
       'Full vaccination schedule: Marek\'s, Newcastle, Gumboro, Fowl Typhoid, and more — with method and timing notes',
       'Select a flock and tap Generate Schedule to auto-create all vaccination dates from the chick receipt date',
+      'Overdue vaccinations flagged in red, upcoming in blue, completed in green',
+      'Mark any vaccination as done — record the actual date, cost (KES), and notes',
+      'Vaccination costs flow automatically into Reports under "Vaccine cost"',
+      'Undo a vaccination mark if entered by mistake',
       'Feeding guide: correct feed type and daily rate for Starter, Grower, and Layer phases',
       'Water schedule with electrolyte guidance for stress periods',
-      'Ongoing Newcastle Disease booster reminder every 3 months from week 19',
     ],
   },
   {

@@ -10,6 +10,10 @@ const FAQ: Record<string, { q: string; a: string }[]> = {
     { q: 'How do I log water?', a: 'Tap the "Water" section and enter the number of litres given to the flock for that day.' },
     { q: 'Can I log data for a past date?', a: 'Yes. Change the Date field at the top to any past date before saving.' },
     { q: 'How do I correct a wrong daily entry?', a: 'Select the flock and the date of the wrong entry. Your saved records for that day will appear below the forms. Tap "Edit" next to the record to change the values, or "Delete" to remove it entirely.' },
+    { q: 'How do I log a bird death?', a: 'Select the flock at the top of Daily Log, then fill in the Mortality card. Choose the cause type (Sickness, Culling, Slaughter, or Natural/Age), enter the number of birds lost, and add optional notes. Tap "Log Mortality". The flock\'s bird count is reduced automatically.' },
+    { q: 'What is the difference between Sickness, Culling, Slaughter, and Natural/Age?', a: 'Sickness: a bird died from disease or infection. Culling: a bird was deliberately removed due to poor health or low productivity. Slaughter: birds were intentionally killed for sale or consumption. Natural/Age: a bird died of old age or unknown natural causes.' },
+    { q: 'Where do I see the full history of bird deaths?', a: 'Tap the "Mortality History" tab at the top of the Daily Log page. Select a flock to see all mortality records for that flock across all dates, with a summary of how many birds were lost per type. You can Edit or Delete any record.' },
+    { q: 'If I delete a mortality record does the flock count go back up?', a: 'Yes. Deleting a mortality record automatically restores the bird count to what it was before that record was saved.' },
   ],
   'Dashboard': [
     { q: 'What are the cards on the dashboard?', a: 'The four cards show: Eggs collected today, Feed cost today (in KES), Total number of birds across all active flocks, and Total revenue earned this month.' },
@@ -44,11 +48,16 @@ const FAQ: Record<string, { q: string; a: string }[]> = {
   ],
   'Reports': [
     { q: 'Where are the reports?', a: 'Go to Reports. You will see six automatic reports: This Week, Last Week, This Month, Last Month, This Year, and Last Year.' },
-    { q: 'What does each report show?', a: 'Each report shows: Total eggs collected, Feed cost, Vaccine cost, Client sales revenue, Ad-hoc sales revenue, Total revenue, and Net profit (revenue minus costs).' },
+    { q: 'What does each report show?', a: 'Each report shows: Current live bird count, Total eggs collected, Feed cost, Vaccine cost, Client sales revenue, Ad-hoc sales revenue, Total revenue, Net profit, and a Mortality breakdown (total deaths split by Sickness, Culling, Slaughter, and Natural/Age) for that period.' },
+    { q: 'How do I export a report to PDF?', a: 'On any report card, tap "Export PDF". A file named Wandera-Farm-[period]-[date].pdf will download. It includes all metrics, the mortality summary, and the Wandera farm branding.' },
+    { q: 'Why does the live bird count look wrong?', a: 'The live bird count reflects the current total across all active flocks right now (not at the start of the period). It updates every time you log a mortality event or edit a mortality record.' },
   ],
   'SOP': [
-    { q: 'What is the SOP page?', a: 'SOP stands for Standard Operating Procedures. It contains the full Kenchic Layer vaccination and feeding guide from when the chicks arrive until they are laying.' },
-    { q: 'How do I generate a vaccination schedule for my flock?', a: 'Go to SOP, tap "Vaccination", select your flock from the dropdown, and tap "Generate Schedule". The app will calculate all vaccination dates based on the date the chicks were received.' },
+    { q: 'What is the SOP page?', a: 'SOP stands for Standard Operating Procedures. It contains the full Kenchic Layer vaccination and feeding guide from when the chicks arrive until they are laying, plus a live vaccination tracker per flock.' },
+    { q: 'How do I generate a vaccination schedule for my flock?', a: 'Go to SOP, tap "Vaccination", select your flock from the dropdown, and tap "Generate Schedule". The app will calculate all 9 vaccination dates based on the date the chicks were received.' },
+    { q: 'How do I mark a vaccination as done?', a: 'In the SOP Vaccination tab, find the vaccine card (Overdue or Upcoming section) and tap "Mark Done". A small form appears where you enter the actual date it was given, the cost in KES (optional), and any notes. Tap "Confirm" to save.' },
+    { q: 'Does the vaccination cost appear anywhere else?', a: 'Yes. Vaccination costs you record in the SOP tracker flow automatically into the Reports page under "Vaccine cost", and are included in the net profit calculation.' },
+    { q: 'What if I marked a vaccination done by mistake?', a: 'Find the vaccination in the Completed section and tap "Undo". This clears the administered date and cost so you can re-mark it correctly.' },
     { q: 'What feed should I use at each stage?', a: 'Weeks 1-8: Chick Mash. Weeks 9-18: Grower Mash. Week 19 onwards: Layer Mash. You can find the full details and daily feed rates on the SOP Feeding tab.' },
   ],
 }

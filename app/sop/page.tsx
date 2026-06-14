@@ -98,7 +98,7 @@ export default function SOP() {
       <h1 className="text-2xl font-bold text-gray-900 mb-2">Standard Operating Procedures</h1>
       <p className="text-gray-500 text-sm mb-6">Kenchic Layer Program</p>
 
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-4">
         {([['vaccination', '💉 Vaccination'], ['feeding', '🌾 Feeding']] as const).map(([t, label]) => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-4 py-2 rounded-xl font-medium ${tab === t ? 'bg-green-700 text-white' : 'bg-white border text-gray-600'}`}>
@@ -106,6 +106,12 @@ export default function SOP() {
           </button>
         ))}
       </div>
+
+      {tab === 'vaccination' && (
+        <div className="mb-4 bg-blue-50 border border-blue-200 rounded-2xl px-4 py-3 text-sm text-blue-800">
+          <span className="font-semibold">Tip:</span> When you mark a vaccination done and enter a cost, that cost is counted in <span className="font-semibold">Reports → Vaccine cost</span> and deducted from net profit automatically.
+        </div>
+      )}
 
       {tab === 'vaccination' && (
         <div className="space-y-5">
