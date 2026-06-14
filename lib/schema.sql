@@ -128,9 +128,13 @@ create table if not exists mortality_logs (
   flock_id uuid references flocks(id) on delete cascade,
   log_date date not null,
   count integer not null,
+  cause_type text default 'sickness',
   cause text,
   created_at timestamptz default now()
 );
+
+-- If the table already exists, add the column:
+-- ALTER TABLE mortality_logs ADD COLUMN IF NOT EXISTS cause_type text DEFAULT 'sickness';
 
 -- ============================================================
 -- SEED DEFAULT INPUTS
