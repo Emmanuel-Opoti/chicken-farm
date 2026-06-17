@@ -1,9 +1,9 @@
 'use client'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, ClipboardList, CalendarDays, Users,
-  ShoppingCart, Archive, BarChart2, BookOpen, FileText, HelpCircle, Menu, X, Home, BookMarked
+  ShoppingCart, Archive, BarChart2, BookOpen, FileText, HelpCircle, Menu, X, Home, BookMarked, LogOut
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -21,6 +21,11 @@ const links = [
   { href: '/help',       label: 'Help',       icon: HelpCircle },
   { href: '/manual',     label: 'User Manual', icon: BookMarked },
 ]
+
+async function logout() {
+  await fetch('/api/auth/logout', { method: 'POST' })
+  window.location.href = '/login'
+}
 
 export default function Nav() {
   const path = usePathname()
@@ -55,9 +60,14 @@ export default function Nav() {
                 </Link>
               ))}
             </nav>
-            <p className="text-center text-xs text-gray-400 py-3 border-t border-gray-100">
-              Made with love by Emo
-            </p>
+            <div className="border-t border-gray-100 p-2">
+              <button onClick={logout}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-colors">
+                <LogOut size={20} />
+                Sign Out
+              </button>
+              <p className="text-center text-xs text-gray-400 py-2">Made with love by Emo</p>
+            </div>
           </div>
         </div>
       )}
@@ -79,9 +89,14 @@ export default function Nav() {
             </Link>
           ))}
         </nav>
-        <p className="text-center text-xs text-gray-400 py-3 border-t border-gray-100">
-          Made with love by Emo
-        </p>
+        <div className="border-t border-gray-100 p-2">
+          <button onClick={logout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-colors">
+            <LogOut size={18} />
+            Sign Out
+          </button>
+          <p className="text-center text-xs text-gray-400 py-2">Made with love by Emo</p>
+        </div>
       </aside>
     </>
   )
