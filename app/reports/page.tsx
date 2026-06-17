@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, subWeeks, subMonths, subYears } from 'date-fns'
 
+interface Flock { id: string; name: string; current_count: number }
+
 interface ReportData {
   totalEggs: number; totalTrays: number; totalFeedCost: number
   totalRevenue: number; totalVaccineCost: number; clientSales: number; adhocSales: number
@@ -18,16 +20,21 @@ const emptyReport: ReportData = {
   totalLiveBirds: 0,
 }
 
-async function fetchReport(start: string, end: string): Promise<ReportData> {
+async function fetchReport(start: string, end: string, flockId: string | null): Promise<ReportData> {
+  const flockFilter = (q: any) => flockId ? q.eq('flock_id', flockId) : q
+
   const [eggs, feed, sales, adhoc, vaccines, mortality, flocks] = await Promise.all([
-    supabase.from('egg_logs').select('total_eggs, trays').gte('log_date', start).lte('log_date', end),
-    supabase.from('feed_logs').select('cost_kes').gte('log_date', start).lte('log_date', end),
+    flockFilter(supabase.from('egg_logs').select('total_eggs, trays')).gte('log_date', start).lte('log_date', end),
+    flockFilter(supabase.from('feed_logs').select('cost_kes')).gte('log_date', start).lte('log_date', end),
     supabase.from('sales').select('amount_kes').gte('sale_date', start).lte('sale_date', end),
     supabase.from('adhoc_sales').select('amount_kes').gte('sale_date', start).lte('sale_date', end),
-    supabase.from('vaccination_logs').select('cost_kes').gte('scheduled_date', start).lte('scheduled_date', end).not('administered_date', 'is', null),
-    supabase.from('mortality_logs').select('count, cause_type').gte('log_date', start).lte('log_date', end),
-    supabase.from('flocks').select('current_count').eq('active', true),
+    flockFilter(supabase.from('vaccination_logs').select('cost_kes')).gte('scheduled_date', start).lte('scheduled_date', end).not('administered_date', 'is', null),
+    flockFilter(supabase.from('mortality_logs').select('count, cause_type')).gte('log_date', start).lte('log_date', end),
+    flockId
+      ? supabase.from('flocks').select('current_count').eq('id', flockId)
+      : supabase.from('flocks').select('current_count').eq('active', true),
   ])
+
   const totalEggs = (eggs.data || []).reduce((s, r) => s + r.total_eggs, 0)
   const clientSales = (sales.data || []).reduce((s, r) => s + r.amount_kes, 0)
   const adhocSales = (adhoc.data || []).reduce((s, r) => s + r.amount_kes, 0)
@@ -48,14 +55,21 @@ async function fetchReport(start: string, end: string): Promise<ReportData> {
   }
 }
 
-function ReportCard({ label, data, start, end, onExport }: {
-  label: string; data: ReportData; start: string; end: string; onExport: () => void
+function ReportCard({ label, data, start, end, flockName, onExport }: {
+  label: string; data: ReportData; start: string; end: string; flockName: string; onExport: () => void
 }) {
   const profit = data.totalRevenue - data.totalFeedCost - data.totalVaccineCost
   return (
     <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
       <div className="flex items-start justify-between mb-1">
-        <h2 className="font-bold text-gray-800 text-lg">{label}</h2>
+        <div>
+          <h2 className="font-bold text-gray-800 text-lg">{label}</h2>
+          {flockName !== 'All Flocks' && (
+            <span className="inline-block mt-0.5 text-xs bg-green-100 text-green-800 rounded-full px-2 py-0.5 font-medium">
+              {flockName}
+            </span>
+          )}
+        </div>
         <button onClick={onExport}
           className="flex items-center gap-1.5 text-xs bg-green-700 text-white rounded-lg px-3 py-1.5 font-medium shrink-0 ml-2">
           Export PDF
@@ -95,18 +109,15 @@ function ReportCard({ label, data, start, end, onExport }: {
   )
 }
 
-async function exportPDF(label: string, data: ReportData, start: string, end: string) {
+async function exportPDF(label: string, data: ReportData, start: string, end: string, flockName: string) {
   const { default: jsPDF } = await import('jspdf')
   const { default: autoTable } = await import('jspdf-autotable')
 
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
   const pageW = doc.internal.pageSize.getWidth()
 
-  // Green header
   doc.setFillColor(21, 128, 61)
   doc.roundedRect(0, 0, pageW, 38, 0, 0, 'F')
-
-  // Farm name
   doc.setTextColor(255, 255, 255)
   doc.setFontSize(16)
   doc.setFont('times', 'bold')
@@ -116,22 +127,25 @@ async function exportPDF(label: string, data: ReportData, start: string, end: st
   doc.setFontSize(9)
   doc.text('Farm Performance Report', pageW / 2, 31, { align: 'center' })
 
-  // Report period
   doc.setTextColor(40, 40, 40)
   doc.setFontSize(13)
   doc.setFont('helvetica', 'bold')
-  doc.text(label, 14, 50)
+  doc.text(label + (flockName !== 'All Flocks' ? ' — ' + flockName : ''), 14, 50)
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(9)
   doc.setTextColor(100, 100, 100)
   doc.text(`${format(new Date(start), 'd MMM yyyy')} – ${format(new Date(end), 'd MMM yyyy')}`, 14, 57)
   doc.text(`Generated: ${format(new Date(), 'd MMM yyyy, HH:mm')}`, pageW - 14, 57, { align: 'right' })
+  if (flockName !== 'All Flocks') {
+    doc.setFontSize(8)
+    doc.setTextColor(130, 130, 130)
+    doc.text('Note: Sales revenue is farm-wide (not flock-specific).', 14, 63)
+  }
 
   const profit = data.totalRevenue - data.totalFeedCost - data.totalVaccineCost
 
-  // Summary table
   autoTable(doc, {
-    startY: 65,
+    startY: flockName !== 'All Flocks' ? 70 : 65,
     head: [['Metric', 'Value']],
     body: [
       ['Live Birds (current)', data.totalLiveBirds.toLocaleString()],
@@ -155,16 +169,16 @@ async function exportPDF(label: string, data: ReportData, start: string, end: st
     columnStyles: { 0: { cellWidth: 90 }, 1: { cellWidth: 80, halign: 'right' } },
     alternateRowStyles: { fillColor: [245, 250, 247] },
     didParseCell: (data) => {
-      if (data.row.index === 8) { // Net Profit
+      if (data.row.index === 8) {
         data.cell.styles.fontStyle = 'bold'
         data.cell.styles.fontSize = 11
         data.cell.styles.textColor = profit >= 0 ? [21, 128, 61] : [220, 38, 38]
       }
-      if (data.row.index === 4 || data.row.index === 7) { // Total Costs / Total Revenue
+      if (data.row.index === 4 || data.row.index === 7) {
         data.cell.styles.fontStyle = 'bold'
         data.cell.styles.fillColor = [230, 245, 235]
       }
-      if (data.row.index === 9) { // Mortality header row
+      if (data.row.index === 9) {
         data.cell.styles.textColor = [120, 120, 120]
         data.cell.styles.fontSize = 8
         data.cell.styles.fillColor = [248, 248, 248]
@@ -172,7 +186,6 @@ async function exportPDF(label: string, data: ReportData, start: string, end: st
     },
   })
 
-  // Footer
   const finalY = (doc as any).lastAutoTable.finalY + 10
   doc.setDrawColor(21, 128, 61)
   doc.setLineWidth(0.3)
@@ -184,39 +197,97 @@ async function exportPDF(label: string, data: ReportData, start: string, end: st
   doc.setFont('helvetica', 'normal')
   doc.text('Wandera Retirement Chicken Business — Confidential', pageW / 2, finalY + 11, { align: 'center' })
 
-  doc.save(`Wandera-Farm-${label.replace(/\s+/g, '-')}-${format(new Date(), 'yyyy-MM-dd')}.pdf`)
+  const suffix = flockName !== 'All Flocks' ? `-${flockName.replace(/\s+/g, '-')}` : ''
+  doc.save(`Wandera-Farm-${label.replace(/\s+/g, '-')}${suffix}-${format(new Date(), 'yyyy-MM-dd')}.pdf`)
 }
 
 export default function Reports() {
-  const [reports, setReports] = useState<{ label: string; data: ReportData; start: string; end: string }[]>([])
+  const [flocks, setFlocks]       = useState<Flock[]>([])
+  const [selectedFlock, setSelectedFlock] = useState<string | null>(null)   // null = All Flocks
+  const [reports, setReports]     = useState<{ label: string; data: ReportData; start: string; end: string }[]>([])
+  const [loading, setLoading]     = useState(false)
 
+  // Load flocks once
   useEffect(() => {
+    supabase.from('flocks').select('id, name, current_count').eq('active', true).order('name')
+      .then(({ data }) => setFlocks(data || []))
+  }, [])
+
+  // Reload reports whenever flock selection changes
+  useEffect(() => {
+    setLoading(true)
     const now = new Date()
     const ranges = [
-      { label: 'This Week',  start: format(startOfWeek(now), 'yyyy-MM-dd'),            end: format(endOfWeek(now), 'yyyy-MM-dd') },
-      { label: 'Last Week',  start: format(startOfWeek(subWeeks(now, 1)), 'yyyy-MM-dd'), end: format(endOfWeek(subWeeks(now, 1)), 'yyyy-MM-dd') },
-      { label: 'This Month', start: format(startOfMonth(now), 'yyyy-MM-dd'),            end: format(endOfMonth(now), 'yyyy-MM-dd') },
-      { label: 'Last Month', start: format(startOfMonth(subMonths(now, 1)), 'yyyy-MM-dd'), end: format(endOfMonth(subMonths(now, 1)), 'yyyy-MM-dd') },
-      { label: 'This Year',  start: format(startOfYear(now), 'yyyy-MM-dd'),             end: format(endOfYear(now), 'yyyy-MM-dd') },
-      { label: 'Last Year',  start: format(startOfYear(subYears(now, 1)), 'yyyy-MM-dd'), end: format(endOfYear(subYears(now, 1)), 'yyyy-MM-dd') },
+      { label: 'This Week',  start: format(startOfWeek(now), 'yyyy-MM-dd'),               end: format(endOfWeek(now), 'yyyy-MM-dd') },
+      { label: 'Last Week',  start: format(startOfWeek(subWeeks(now, 1)), 'yyyy-MM-dd'),  end: format(endOfWeek(subWeeks(now, 1)), 'yyyy-MM-dd') },
+      { label: 'This Month', start: format(startOfMonth(now), 'yyyy-MM-dd'),              end: format(endOfMonth(now), 'yyyy-MM-dd') },
+      { label: 'Last Month', start: format(startOfMonth(subMonths(now, 1)), 'yyyy-MM-dd'),end: format(endOfMonth(subMonths(now, 1)), 'yyyy-MM-dd') },
+      { label: 'This Year',  start: format(startOfYear(now), 'yyyy-MM-dd'),               end: format(endOfYear(now), 'yyyy-MM-dd') },
+      { label: 'Last Year',  start: format(startOfYear(subYears(now, 1)), 'yyyy-MM-dd'),  end: format(endOfYear(subYears(now, 1)), 'yyyy-MM-dd') },
     ]
-    Promise.all(ranges.map(r => fetchReport(r.start, r.end))).then(results => {
+    Promise.all(ranges.map(r => fetchReport(r.start, r.end, selectedFlock))).then(results => {
       setReports(ranges.map((r, i) => ({ ...r, data: results[i] })))
+      setLoading(false)
     })
-  }, [])
+  }, [selectedFlock])
+
+  const flockName = selectedFlock
+    ? (flocks.find(f => f.id === selectedFlock)?.name ?? 'Flock')
+    : 'All Flocks'
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Reports</h1>
-      <div className="grid md:grid-cols-2 gap-5">
-        {reports.length === 0
-          ? <p className="text-gray-400 col-span-2 py-10 text-center">Loading reports...</p>
-          : reports.map(r => (
-            <ReportCard key={r.label} {...r}
-              onExport={() => exportPDF(r.label, r.data, r.start, r.end)} />
-          ))
-        }
+      <h1 className="text-2xl font-bold text-gray-900 mb-4">Reports</h1>
+
+      {/* Flock selector */}
+      <div className="mb-6">
+        <p className="text-xs font-medium text-gray-500 mb-2">Viewing data for</p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setSelectedFlock(null)}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              selectedFlock === null
+                ? 'bg-green-700 text-white'
+                : 'bg-white border border-gray-200 text-gray-600 hover:border-green-400'
+            }`}>
+            All Flocks
+          </button>
+          {flocks.map(f => (
+            <button
+              key={f.id}
+              onClick={() => setSelectedFlock(f.id)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                selectedFlock === f.id
+                  ? 'bg-green-700 text-white'
+                  : 'bg-white border border-gray-200 text-gray-600 hover:border-green-400'
+              }`}>
+              {f.name}
+              <span className={`ml-1.5 text-xs ${selectedFlock === f.id ? 'text-green-200' : 'text-gray-400'}`}>
+                ({f.current_count} birds)
+              </span>
+            </button>
+          ))}
+        </div>
+        {selectedFlock !== null && (
+          <p className="mt-2 text-xs text-amber-700 bg-amber-50 rounded-xl px-3 py-2 border border-amber-100">
+            Sales revenue shows farm-wide totals — sales are not linked to individual flocks.
+          </p>
+        )}
       </div>
+
+      {loading && (
+        <p className="text-gray-400 text-center py-10">Loading reports...</p>
+      )}
+
+      {!loading && (
+        <div className="grid md:grid-cols-2 gap-5">
+          {reports.map(r => (
+            <ReportCard key={r.label} {...r}
+              flockName={flockName}
+              onExport={() => exportPDF(r.label, r.data, r.start, r.end, flockName)} />
+          ))}
+        </div>
+      )}
     </div>
   )
 }
