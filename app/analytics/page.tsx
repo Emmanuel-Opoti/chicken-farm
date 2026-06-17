@@ -44,11 +44,11 @@ export default function Analytics() {
       const range = eachDayOfInterval({ start: new Date(start), end: new Date(end) })
       const points: DailyPoint[] = range.map(d => {
         const dateStr = format(d, 'yyyy-MM-dd')
-        const dayEggs = (eggs.data || []).filter(r => r.log_date === dateStr).reduce((s, r) => s + r.total_eggs, 0)
-        const dayFeed = (feed.data || []).filter(r => r.log_date === dateStr).reduce((s, r) => s + r.cost_kes, 0)
+        const dayEggs = (eggs.data || []).filter((r: any) => r.log_date === dateStr).reduce((s: number, r: any) => s + r.total_eggs, 0)
+        const dayFeed = (feed.data || []).filter((r: any) => r.log_date === dateStr).reduce((s: number, r: any) => s + r.cost_kes, 0)
         const dayRev =
-          (sales.data || []).filter(r => r.sale_date === dateStr).reduce((s, r) => s + r.amount_kes, 0) +
-          (adhoc.data || []).filter(r => r.sale_date === dateStr).reduce((s, r) => s + r.amount_kes, 0)
+          (sales.data || []).filter((r: any) => r.sale_date === dateStr).reduce((s: number, r: any) => s + r.amount_kes, 0) +
+          (adhoc.data || []).filter((r: any) => r.sale_date === dateStr).reduce((s: number, r: any) => s + r.amount_kes, 0)
         return { date: format(d, 'd MMM'), eggs: dayEggs, feedCost: dayFeed, revenue: dayRev }
       })
       setData(points)
