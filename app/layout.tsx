@@ -13,7 +13,10 @@ export const metadata: Metadata = {
     title: 'Wandera Farm',
   },
   icons: {
-    icon: '/icons/icon-192.png',
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/icons/icon-192.png', sizes: '192x192' },
+    ],
     apple: '/icons/icon-192.png',
   },
 }
@@ -27,6 +30,9 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+      </head>
       <body>
         <SWRegister />
         <AppShell>{children}</AppShell>
