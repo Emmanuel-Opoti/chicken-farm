@@ -10,6 +10,7 @@ export default function LoginPage() {
   const [error, setError]       = useState('')
   const [loading, setLoading]   = useState(false)
   const [welcome, setWelcome]   = useState(false)
+  const [displayName, setDisplayName] = useState('')
   const [mounted, setMounted]   = useState(false)
 
   useEffect(() => { setMounted(true) }, [])
@@ -25,6 +26,8 @@ export default function LoginPage() {
         body: JSON.stringify({ username: username.trim().toLowerCase(), password }),
       })
       if (res.ok) {
+        const data = await res.json()
+        setDisplayName(data.displayName || 'Welcome')
         setWelcome(true)
         setTimeout(() => router.push('/dashboard'), 2200)
       } else {
@@ -188,7 +191,7 @@ export default function LoginPage() {
               style={{ background: 'white', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
               <div className="text-6xl mb-4">🐔</div>
               <h2 className="text-3xl font-bold text-green-800 mb-2">Welcome,</h2>
-              <h1 className="text-4xl font-extrabold text-green-700 mb-3">Fred Wandera!</h1>
+              <h1 className="text-4xl font-extrabold text-green-700 mb-3">{displayName}!</h1>
               <p className="text-gray-500 text-sm">Taking you to your farm dashboard...</p>
               <div className="mt-5 flex justify-center gap-1">
                 {[0,1,2].map(i => (
