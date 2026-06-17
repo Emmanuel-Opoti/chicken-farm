@@ -35,23 +35,23 @@ async function fetchReport(start: string, end: string, flockId: string | null): 
       : supabase.from('flocks').select('current_count').eq('active', true),
   ])
 
-  const totalEggs = (eggs.data || []).reduce((s, r) => s + r.total_eggs, 0)
-  const clientSales = (sales.data || []).reduce((s, r) => s + r.amount_kes, 0)
-  const adhocSales = (adhoc.data || []).reduce((s, r) => s + r.amount_kes, 0)
-  const mortalityRows = mortality.data || []
+  const totalEggs = (eggs.data || []).reduce((s: number, r: any) => s + r.total_eggs, 0)
+  const clientSales = (sales.data || []).reduce((s: number, r: any) => s + r.amount_kes, 0)
+  const adhocSales = (adhoc.data || []).reduce((s: number, r: any) => s + r.amount_kes, 0)
+  const mortalityRows: any[] = mortality.data || []
   return {
     totalEggs,
     totalTrays: Math.floor(totalEggs / 12),
-    totalFeedCost: (feed.data || []).reduce((s, r) => s + r.cost_kes, 0),
-    totalVaccineCost: (vaccines.data || []).reduce((s, r) => s + (r.cost_kes || 0), 0),
+    totalFeedCost: (feed.data || []).reduce((s: number, r: any) => s + r.cost_kes, 0),
+    totalVaccineCost: (vaccines.data || []).reduce((s: number, r: any) => s + (r.cost_kes || 0), 0),
     clientSales, adhocSales,
     totalRevenue: clientSales + adhocSales,
-    totalMortality: mortalityRows.reduce((s, r) => s + r.count, 0),
-    mortalitySickness:  mortalityRows.filter(r => r.cause_type === 'sickness').reduce((s, r) => s + r.count, 0),
-    mortalitySlaughter: mortalityRows.filter(r => r.cause_type === 'slaughter').reduce((s, r) => s + r.count, 0),
-    mortalityCulling:   mortalityRows.filter(r => r.cause_type === 'culling').reduce((s, r) => s + r.count, 0),
-    mortalityAge:       mortalityRows.filter(r => r.cause_type === 'age').reduce((s, r) => s + r.count, 0),
-    totalLiveBirds: (flocks.data || []).reduce((s, r) => s + r.current_count, 0),
+    totalMortality: mortalityRows.reduce((s: number, r: any) => s + r.count, 0),
+    mortalitySickness:  mortalityRows.filter((r: any) => r.cause_type === 'sickness').reduce((s: number, r: any) => s + r.count, 0),
+    mortalitySlaughter: mortalityRows.filter((r: any) => r.cause_type === 'slaughter').reduce((s: number, r: any) => s + r.count, 0),
+    mortalityCulling:   mortalityRows.filter((r: any) => r.cause_type === 'culling').reduce((s: number, r: any) => s + r.count, 0),
+    mortalityAge:       mortalityRows.filter((r: any) => r.cause_type === 'age').reduce((s: number, r: any) => s + r.count, 0),
+    totalLiveBirds: (flocks.data || []).reduce((s: number, r: any) => s + r.current_count, 0),
   }
 }
 
