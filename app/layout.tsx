@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
-import Nav from '@/components/Nav'
 import SWRegister from '@/components/SWRegister'
+import AppShell from '@/components/AppShell'
 
 export const metadata: Metadata = {
   title: 'Wandera Chicken Business',
@@ -29,12 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <SWRegister />
-        <Nav />
-        <main className="pt-14 md:pt-0 md:pl-56 min-h-screen">
-          <div className="p-4 md:p-6 max-w-5xl mx-auto">
-            {children}
-          </div>
-        </main>
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   )
