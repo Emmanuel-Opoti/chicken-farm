@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, ClipboardList, CalendarDays, Users,
   ShoppingCart, Archive, BarChart2, BookOpen, FileText, HelpCircle,
-  Menu, X, Home, BookMarked, LogOut, Sun, Moon
+  Menu, X, Home, BookMarked, LogOut, Sun, Moon, Receipt
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -18,6 +18,7 @@ const links = [
   { href: '/sales',     label: 'Sales',       icon: ShoppingCart },
   { href: '/registry',  label: 'Registry',    icon: Archive },
   { href: '/reports',   label: 'Reports',     icon: FileText },
+  { href: '/expenses',  label: 'Expenses',    icon: Receipt },
   { href: '/sop',       label: 'SOP',         icon: BookOpen },
   { href: '/help',      label: 'Help',        icon: HelpCircle },
   { href: '/manual',    label: 'User Manual', icon: BookMarked },

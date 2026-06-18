@@ -10,20 +10,20 @@ interface ReportData {
   totalEggs: number; totalTrays: number; totalFeedCost: number
   totalRevenue: number; totalVaccineCost: number; clientSales: number; adhocSales: number
   totalMortality: number; mortalitySickness: number; mortalitySlaughter: number; mortalityCulling: number; mortalityAge: number
-  totalLiveBirds: number
+  totalLiveBirds: number; miscExpenses: number; flockPurchaseCost: number
 }
 
 const emptyReport: ReportData = {
   totalEggs: 0, totalTrays: 0, totalFeedCost: 0,
   totalRevenue: 0, totalVaccineCost: 0, clientSales: 0, adhocSales: 0,
   totalMortality: 0, mortalitySickness: 0, mortalitySlaughter: 0, mortalityCulling: 0, mortalityAge: 0,
-  totalLiveBirds: 0,
+  totalLiveBirds: 0, miscExpenses: 0, flockPurchaseCost: 0,
 }
 
 async function fetchReport(start: string, end: string, flockId: string | null): Promise<ReportData> {
   const flockFilter = (q: any) => flockId ? q.eq('flock_id', flockId) : q
 
-  const [eggs, feed, sales, adhoc, vaccines, mortality, flocks] = await Promise.all([
+  const [eggs, feed, sales, adhoc, vaccines, mortality, flocks, misc, flockPurchase] = await Promise.all([
     flockFilter(supabase.from('egg_logs').select('total_eggs, trays')).gte('log_date', start).lte('log_date', end),
     flockFilter(supabase.from('feed_logs').select('cost_kes')).gte('log_date', start).lte('log_date', end),
     supabase.from('sales').select('amount_kes').gte('sale_date', start).lte('sale_date', end),
@@ -33,6 +33,12 @@ async function fetchReport(start: string, end: string, flockId: string | null): 
     flockId
       ? supabase.from('flocks').select('current_count').eq('id', flockId)
       : supabase.from('flocks').select('current_count').eq('active', true),
+    flockId
+      ? supabase.from('misc_expenses').select('amount_kes').eq('flock_id', flockId).gte('expense_date', start).lte('expense_date', end)
+      : supabase.from('misc_expenses').select('amount_kes').gte('expense_date', start).lte('expense_date', end),
+    flockId
+      ? supabase.from('flocks').select('purchase_cost_kes').eq('id', flockId).gte('date_received', start).lte('date_received', end)
+      : supabase.from('flocks').select('purchase_cost_kes').gte('date_received', start).lte('date_received', end),
   ])
 
   const totalEggs = (eggs.data || []).reduce((s: number, r: any) => s + r.total_eggs, 0)
@@ -52,13 +58,16 @@ async function fetchReport(start: string, end: string, flockId: string | null): 
     mortalityCulling:   mortalityRows.filter((r: any) => r.cause_type === 'culling').reduce((s: number, r: any) => s + r.count, 0),
     mortalityAge:       mortalityRows.filter((r: any) => r.cause_type === 'age').reduce((s: number, r: any) => s + r.count, 0),
     totalLiveBirds: (flocks.data || []).reduce((s: number, r: any) => s + r.current_count, 0),
+    miscExpenses: (misc.data || []).reduce((s: number, r: any) => s + r.amount_kes, 0),
+    flockPurchaseCost: (flockPurchase.data || []).reduce((s: number, r: any) => s + (r.purchase_cost_kes || 0), 0),
   }
 }
 
 function ReportCard({ label, data, start, end, flockName, onExport }: {
   label: string; data: ReportData; start: string; end: string; flockName: string; onExport: () => void
 }) {
-  const profit = data.totalRevenue - data.totalFeedCost - data.totalVaccineCost
+  const totalCosts = data.totalFeedCost + data.totalVaccineCost + data.miscExpenses + data.flockPurchaseCost
+  const profit = data.totalRevenue - totalCosts
   return (
     <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
       <div className="flex items-start justify-between mb-1">
@@ -85,6 +94,14 @@ function ReportCard({ label, data, start, end, flockName, onExport }: {
         <span className="font-semibold text-red-600">KES {data.totalFeedCost.toLocaleString()}</span>
         <span className="text-gray-500">Vaccine cost</span>
         <span className="font-semibold text-red-600">KES {data.totalVaccineCost.toLocaleString()}</span>
+        {data.miscExpenses > 0 && <>
+          <span className="text-gray-500">Misc expenses</span>
+          <span className="font-semibold text-red-600">KES {data.miscExpenses.toLocaleString()}</span>
+        </>}
+        {data.flockPurchaseCost > 0 && <>
+          <span className="text-gray-500">Flock purchase</span>
+          <span className="font-semibold text-red-600">KES {data.flockPurchaseCost.toLocaleString()}</span>
+        </>}
         <span className="text-gray-500">Client sales</span>
         <span className="font-semibold text-green-700">KES {data.clientSales.toLocaleString()}</span>
         <span className="text-gray-500">Ad-hoc sales</span>
@@ -142,7 +159,8 @@ async function exportPDF(label: string, data: ReportData, start: string, end: st
     doc.text('Note: Sales revenue is farm-wide (not flock-specific).', 14, 63)
   }
 
-  const profit = data.totalRevenue - data.totalFeedCost - data.totalVaccineCost
+  const totalCosts = data.totalFeedCost + data.totalVaccineCost + data.miscExpenses + data.flockPurchaseCost
+  const profit = data.totalRevenue - totalCosts
 
   autoTable(doc, {
     startY: flockName !== 'All Flocks' ? 70 : 65,
@@ -152,7 +170,9 @@ async function exportPDF(label: string, data: ReportData, start: string, end: st
       ['Total Eggs Collected', `${data.totalEggs.toLocaleString()} eggs (${data.totalTrays} trays)`],
       ['Feed Cost', `KES ${data.totalFeedCost.toLocaleString()}`],
       ['Vaccine Cost', `KES ${data.totalVaccineCost.toLocaleString()}`],
-      ['Total Costs', `KES ${(data.totalFeedCost + data.totalVaccineCost).toLocaleString()}`],
+      ['Misc Expenses', `KES ${data.miscExpenses.toLocaleString()}`],
+      ['Flock Purchase Cost', `KES ${data.flockPurchaseCost.toLocaleString()}`],
+      ['Total Costs', `KES ${totalCosts.toLocaleString()}`],
       ['Client Sales Revenue', `KES ${data.clientSales.toLocaleString()}`],
       ['Ad-hoc Sales Revenue', `KES ${data.adhocSales.toLocaleString()}`],
       ['Total Revenue', `KES ${data.totalRevenue.toLocaleString()}`],

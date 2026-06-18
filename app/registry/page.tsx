@@ -7,7 +7,7 @@ import { format, differenceInDays } from 'date-fns'
 interface Flock {
   id: string; name: string; breed: string; date_received: string
   initial_count: number; current_count: number; active: boolean; notes: string
-  age_at_receipt_weeks: number
+  age_at_receipt_weeks: number; purchase_cost_kes: number
 }
 interface Input {
   id: string; name: string; category: string; unit: string
@@ -34,7 +34,7 @@ export default function Registry() {
 
   const [flockForm, setFlockForm] = useState({
     name: '', breed: 'Kenchic Layer', date_received: format(new Date(), 'yyyy-MM-dd'),
-    initial_count: '', notes: '', age_at_receipt_weeks: '0',
+    initial_count: '', notes: '', age_at_receipt_weeks: '0', purchase_cost_kes: '',
   })
 
   const [inputForm, setInputForm] = useState({
@@ -56,15 +56,15 @@ export default function Registry() {
     e.preventDefault(); setSaving(true)
     const count = parseInt(flockForm.initial_count)
     const { error } = await supabase.from('flocks').insert({
-      ...flockForm,
-      initial_count: count,
-      current_count: count,
+      name: flockForm.name, breed: flockForm.breed, date_received: flockForm.date_received,
+      notes: flockForm.notes, initial_count: count, current_count: count,
       age_at_receipt_weeks: parseInt(flockForm.age_at_receipt_weeks) || 0,
+      purchase_cost_kes: parseFloat(flockForm.purchase_cost_kes) || 0,
     })
     setSaving(false)
     if (!error) {
       setMsg('Flock added!')
-      setFlockForm({ name: '', breed: 'Kenchic Layer', date_received: format(new Date(), 'yyyy-MM-dd'), initial_count: '', notes: '', age_at_receipt_weeks: '0' })
+      setFlockForm({ name: '', breed: 'Kenchic Layer', date_received: format(new Date(), 'yyyy-MM-dd'), initial_count: '', notes: '', age_at_receipt_weeks: '0', purchase_cost_kes: '' })
       loadData()
     }
   }
@@ -160,6 +160,13 @@ export default function Registry() {
                   className="w-full border border-gray-300 rounded-xl px-3 py-2" />
               </div>
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Purchase cost (KES)</label>
+                <input type="number" min="0" value={flockForm.purchase_cost_kes}
+                  onChange={e => setFlockForm(p => ({ ...p, purchase_cost_kes: e.target.value }))}
+                  placeholder="e.g. 15000 — total paid for all chicks"
+                  className="w-full border border-gray-300 rounded-xl px-3 py-2" />
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
                 <input value={flockForm.notes} onChange={e => setFlockForm(p => ({ ...p, notes: e.target.value }))}
                   className="w-full border border-gray-300 rounded-xl px-3 py-2" />
@@ -193,6 +200,9 @@ export default function Registry() {
                         <span className="font-medium">Current feed:</span> {phase.feed} &nbsp;·&nbsp;
                         <span className="font-medium">Rate:</span> ~{phase.rate}g/bird/day &nbsp;·&nbsp;
                         <span className="font-medium">Expected daily:</span> {((phase.rate * f.current_count) / 1000).toFixed(1)} kg
+                        {f.purchase_cost_kes > 0 && (
+                          <span> &nbsp;·&nbsp; <span className="font-medium">Purchase cost:</span> KES {f.purchase_cost_kes.toLocaleString()}</span>
+                        )}
                       </div>
                     </div>
                     <div className="flex gap-2 ml-3 shrink-0">

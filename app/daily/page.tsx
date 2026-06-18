@@ -40,6 +40,7 @@ export default function DailyLog() {
   const [brokenEggs, setBrokenEggs] = useState('0')
   const [feedInputId, setFeedInputId] = useState('')
   const [feedQty, setFeedQty] = useState('')
+  const [feedCostOverride, setFeedCostOverride] = useState('')
   const [water, setWater] = useState('')
   const [mortalityCount, setMortalityCount] = useState('')
   const [mortalityCauseType, setMortalityCauseType] = useState('sickness')
@@ -104,7 +105,8 @@ export default function DailyLog() {
 
   const feedInputs = inputs.filter(i => i.category === 'feed')
   const selectedFeed = inputs.find(i => i.id === feedInputId)
-  const feedCost = selectedFeed && feedQty ? ((parseFloat(feedQty) / 50) * selectedFeed.price_kes).toFixed(0) : null
+  const feedCostCalc = selectedFeed && feedQty ? ((parseFloat(feedQty) / 50) * selectedFeed.price_kes).toFixed(0) : null
+  const feedCost = feedCostOverride !== '' ? feedCostOverride : feedCostCalc
 
   async function saveEggs(e: React.FormEvent) {
     e.preventDefault(); setSaving(true)
@@ -117,9 +119,10 @@ export default function DailyLog() {
     e.preventDefault()
     if (!selectedFeed || !feedQty) return
     setSaving(true)
-    const { error } = await supabase.from('feed_logs').insert({ flock_id: flockId, input_id: feedInputId, log_date: date, quantity_kg: parseFloat(feedQty), cost_kes: (parseFloat(feedQty) / 50) * selectedFeed.price_kes })
+    const cost = feedCostOverride !== '' ? parseFloat(feedCostOverride) : (parseFloat(feedQty) / 50) * selectedFeed.price_kes
+    const { error } = await supabase.from('feed_logs').insert({ flock_id: flockId, input_id: feedInputId, log_date: date, quantity_kg: parseFloat(feedQty), cost_kes: cost })
     setSaving(false)
-    if (!error) { setSaved('Feed saved!'); loadLogs() }
+    if (!error) { setSaved('Feed saved!'); setFeedCostOverride(''); loadLogs() }
   }
 
   async function saveWater(e: React.FormEvent) {
@@ -254,7 +257,18 @@ export default function DailyLog() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Quantity (kg)</label>
                 <input type="number" min="0" step="0.1" value={feedQty} onChange={e => setFeedQty(e.target.value)} placeholder="e.g. 5"
                   className="w-full border border-gray-300 rounded-xl px-3 py-2 text-base" required />
-                {feedCost && <p className="text-xs text-gray-500 mt-1">Cost: KES {parseInt(feedCost).toLocaleString()}</p>}
+              </div>
+              <div className="mb-3">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Cost (KES)
+                  {feedCostCalc && feedCostOverride === '' && (
+                    <span className="text-gray-400 font-normal ml-1">— auto: KES {parseInt(feedCostCalc).toLocaleString()}</span>
+                  )}
+                </label>
+                <input type="number" min="0" value={feedCostOverride} onChange={e => setFeedCostOverride(e.target.value)}
+                  placeholder={feedCostCalc ? `Auto: ${parseInt(feedCostCalc).toLocaleString()}` : 'Calculated from price'}
+                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-base" />
+                <p className="text-xs text-gray-400 mt-1">Leave blank to use the current price. Override for backdated entries.</p>
               </div>
               <button disabled={!flockId || saving} className="w-full bg-green-600 text-white rounded-xl py-3 font-semibold disabled:opacity-40">Save Feed</button>
             </form>
