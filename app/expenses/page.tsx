@@ -49,7 +49,7 @@ export default function Expenses() {
         .order('expense_date', { ascending: false }),
     ])
     if (f.data) setFlocks(f.data)
-    if (e.data) setExpenses(e.data as Expense[])
+    if (e.data) setExpenses(e.data as unknown as Expense[])
   }
 
   useEffect(() => { load() }, [])
